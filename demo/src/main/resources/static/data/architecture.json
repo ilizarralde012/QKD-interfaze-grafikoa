@@ -1,0 +1,128 @@
+{
+  "directed": false,
+  "multigraph": false,
+  "graph": {},
+  "nodes": [
+    {
+      "site": "Site_A",
+      "node_type": "CN",
+      "vKMS": "vKMS_A",
+      "vkms_address": "vkms-a-service.site-a.svc.cluster.local",
+      "id": "Site_A"
+    },
+    {
+      "site": "Site_B",
+      "node_type": "CN",
+      "vKMS": "vKMS_B",
+      "vkms_address": "vkms-b-service.site-b.svc.cluster.local",
+      "id": "Site_B"
+    },
+    {
+      "site": "Site_C",
+      "node_type": "CN",
+      "vKMS": "vKMS_C",
+      "vkms_address": "vkms-c-service.site-c.svc.cluster.local",
+      "id": "Site_C"
+    },
+    {
+      "site": "Site_D",
+      "node_type": "QN",
+      "vKMS": "vKMS_D",
+      "vkms_address": "vkms-d-service.site-d.svc.cluster.local",
+      "id": "Site_D"
+    },
+    {
+      "site": "Site_E",
+      "node_type": "QN",
+      "vKMS": "vKMS_E",
+      "vkms_address": "vkms-e-service.site-e.svc.cluster.local",
+      "id": "Site_E"
+    },
+    {
+      "site": "Site_F",
+      "node_type": "QN",
+      "vKMS": "vKMS_F",
+      "vkms_address": "vkms-f-service.site-f.svc.cluster.local",
+      "id": "Site_F"
+    },
+    {
+      "site": "Site_D",
+      "node_type": "KMS",
+      "vKMS": "vKMS_D",
+      "address": "kms-d-service.site-d.svc.cluster.local",
+      "id": "KMS_D"
+    },
+    {
+      "site": "Site_E",
+      "node_type": "KMS",
+      "vKMS": "vKMS_E",
+      "address": "kms-e1-service.site-e.svc.cluster.local",
+      "id": "KMS_E1"
+    },
+    {
+      "site": "Site_E",
+      "node_type": "KMS",
+      "vKMS": "vKMS_E",
+      "address": "kms-e2-service.site-e.svc.cluster.local",
+      "id": "KMS_E2"
+    },
+    {
+      "site": "Site_F",
+      "node_type": "KMS",
+      "vKMS": "vKMS_F",
+      "address": "kms-f-service.site-f.svc.cluster.local",
+      "id": "KMS_F"
+    }
+  ],
+  "links": [
+    {
+      "source": "KMS_D",
+      "target": "KMS_E1",
+      "quantum_link": true
+    },
+    {
+      "source": "KMS_F",
+      "target": "KMS_E2",
+      "quantum_link": true
+    },
+    {
+      "source": "KMS_E2",
+      "target": "KMS_E1",
+      "quantum_link": true
+    }
+  ],
+  "classical-links": [
+    {
+      "source": "Site_A",
+      "target": "Site_B"
+    },
+    {
+      "source": "Site_A",
+      "target": "Site_C"
+    },
+    {
+      "source": "Site_B",
+      "target": "Site_C"
+    },
+    {
+      "source": "Site_C",
+      "target": "Site_E"
+    },
+    {
+      "source": "Site_B",
+      "target": "Site_D"
+    },
+    {
+      "source": "Site_D",
+      "target": "Site_E"
+    },
+    {
+      "source": "Site_D",
+      "target": "Site_F"
+    },
+    {
+      "source": "Site_E",
+      "target": "Site_F"
+    }
+  ]
+}

@@ -1,61 +1,126 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <title>Quantum Network Topology</title>
-    <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
-    <style>
-        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 20px; background-color: #fcfcfc; color: #333; }
-        .container { max-width: 1100px; margin: auto; background: white; padding: 30px; border: 1px solid #ddd; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-        
-        /* Título Estilo Banner */
-        h1 { text-align: center; border: 1.5px solid #444; padding: 15px; background: #f8f9fa; border-radius: 10px; text-transform: uppercase; letter-spacing: 2px; }
-        
-        /* Área del Mapa (Inmóvil) */
-        #mynetwork { height: 450px; border: 1px solid #eee; margin-bottom: 30px; background: #ffffff; cursor: default; }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Network Topology</title>
 
-        /* Panel de Información inferior */
-        #info-panel { border: 2px dashed #ccc; padding: 20px; min-height: 120px; background: #fafafa; border-radius: 8px; margin-bottom: 25px; }
-        #placeholder-text { color: #888; text-align: center; font-style: italic; margin-top: 30px; }
-        
-        /* Estilo de la Tabla */
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; animation: fadeIn 0.5s; }
-        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
-        th { background-color: #f2f2f2; width: 30%; font-weight: bold; color: #555; }
-        tr:hover { background-color: #f9f9f9; }
+  <!-- Fuentes de Google -->
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 
-        /* Botones de Navegación */
-        .nav-buttons { display: flex; gap: 15px; justify-content: flex-start; }
-        .btn { padding: 12px 25px; border: 1px solid #444; background: #f0f0f0; cursor: pointer; border-radius: 6px; 
-               text-decoration: none; color: #333; font-weight: bold; transition: all 0.2s; }
-        .btn:hover { background: #e0e0e0; border-color: #000; box-shadow: 2px 2px 5px rgba(0,0,0,0.1); }
+  <!-- Librería D3 desde CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
 
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-    </style>
+  <!--
+    Ruta del CSS: Spring Boot sirve todo lo que está en
+    resources/static/ directamente desde la raíz ("/").
+    → resources/static/css/style.css  =  /css/style.css
+  -->
+  <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
 
-<div class="container">
-    <h1>Network Topology</h1>
+  <!-- ── BARRA SUPERIOR ── -->
+  <header class="topbar">
+    <span class="logo">Network Topology</span>
+    <div class="topbar-sep"></div>
+    <!--
+      Los enlaces apuntan a los otros templates de Spring Boot.
+      Spring Boot los sirve desde /apps y /requests
+      según las rutas que definas en tu controller.
+    -->
+    <a href="/apps"     class="nav-btn"><span class="nav-btn-icon">⊞</span>See Apps</a>
+    <a href="/requests" class="nav-btn"><span class="nav-btn-icon">↔</span>See Requests</a>
+  </header>
 
-    <div id="mynetwork"></div>
+  <!-- ── CONTENIDO PRINCIPAL ── -->
+  <main class="main">
 
-    <div id="info-panel">
-        <div id="placeholder-text">Haz clic en un nodo o enlace para ver los detalles técnicos...</div>
-        <div id="detail-content" style="display:none;">
-            <h3 id="detail-title" style="margin-top:0; color: #2c3e50;">Detalles</h3>
-            <table id="detail-table">
-                <tbody id="table-body"></tbody>
-            </table>
+    <!-- Canvas del grafo SVG -->
+    <div class="canvas-wrap">
+      <svg id="graph-svg"></svg>
+
+      <!-- Leyenda -->
+      <div class="legend">
+        <div class="legend-title">Nodo motak</div>
+        <div class="legend-row">
+          <svg class="legend-icon" viewBox="0 0 26 26">
+            <circle cx="13" cy="13" r="11" fill="var(--cn-bg)" stroke="var(--cn-color)" stroke-width="1.8"/>
+            <text x="13" y="17" text-anchor="middle" font-size="10" fill="var(--cn-color)" font-family="DM Mono">C</text>
+          </svg>
+          Nodo klasikoa
         </div>
+        <div class="legend-row">
+          <svg class="legend-icon" viewBox="0 0 26 26">
+            <rect x="2" y="2" width="22" height="22" rx="4" fill="var(--qn-bg)" stroke="var(--qn-color)" stroke-width="1.8"/>
+            <text x="13" y="17" text-anchor="middle" font-size="10" fill="var(--qn-color)" font-family="DM Mono">Q</text>
+          </svg>
+          Nodo kuantikoa
+        </div>
+        <div class="legend-sep"></div>
+        <div class="legend-title">Lotura motak</div>
+        <div class="legend-row">
+          <div class="legend-line" style="background: var(--cl-color)"></div>
+          Lotura klasikoa
+        </div>
+        <div class="legend-row">
+          <div class="legend-dashed"></div>
+          Lotura kuantikoa
+        </div>
+      </div>
     </div>
 
-    <div class="nav-buttons">
-        <a href="/requests" class="btn">See requests</a>
-        <a href="/apps" class="btn">See apps</a>
-    </div>
-</div>
+    <!-- Panel lateral de información -->
+    <aside class="side-panel">
 
-<script src="/js/network-logic.js"></script>
+      <div class="panel-header">
+        <div class="panel-dot" id="panel-dot"></div>
+        Informazioa
+      </div>
+
+      <!-- Estadísticas: los valores los rellena main.js -->
+      <div class="stats-block">
+        <div class="stat-cell">
+          <div class="stat-label">
+            <div class="stat-dot" style="background: var(--cn-color)"></div>
+            Nodo klasiko kopurua:
+          </div>
+          <div class="stat-number" id="stat-cn">—</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-label">
+            <div class="stat-dot" style="background: var(--qn-color)"></div>
+            Nodo kuantiko kopurua:
+          </div>
+          <div class="stat-number" id="stat-qn">—</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-label">
+            <div class="stat-dot" style="background: var(--cl-color)"></div>
+            Lotura klasiko kopurua:
+          </div>
+          <div class="stat-number" id="stat-cl">—</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-label">
+            <div class="stat-dot" style="background: var(--ql-color)"></div>
+            Lotura kuantiko kopurua:
+          </div>
+          <div class="stat-number" id="stat-ql">—</div>
+        </div>
+      </div>
+
+      <!-- Cuerpo dinámico: panel.js inyecta aquí el contenido -->
+      <div class="panel-body" id="panel-body"></div>
+
+    </aside>
+  </main>
+
+  <!--
+    type="module" activa el sistema de imports/exports entre archivos JS.
+    La ruta es absoluta → resources/static/js/main.js = /js/main.js
+  -->
+  <script type="module" src="/js/main.js"></script>
+
 </body>
 </html>

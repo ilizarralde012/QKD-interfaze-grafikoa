@@ -357,6 +357,37 @@ body {
   word-break: break-all;
 }
 
+/* ── Tarjetas de Apps ──────────────────────────────────────────── */
+.app-card {
+  background: var(--cn-bg);
+  border: 1px solid var(--cn-border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+}
+.app-id {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--cn-color);
+  margin-bottom: 6px;
+}
+
+/* Texto cuando no hay apps o hay error al cargarlas */
+.apps-empty {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-style: italic;
+  padding: 4px 0;
+}
+
+/* Texto de carga mientras espera la respuesta del servidor */
+.apps-loading {
+  font-size: 12px;
+  color: var(--text-muted);
+  padding: 4px 0;
+}
+
 
 /* ── 9. ELEMENTOS SVG DEL GRAFO ────────────────────────────────── */
 .node-g { cursor: pointer; }
@@ -397,7 +428,7 @@ body {
   stroke: var(--ql-color);
   stroke-width: 4;
   stroke-dasharray: 9 6;
-  stroke-opacity: 0.5;
+  stroke-opacity: 0.55;
   fill: none;
   cursor: pointer;
   transition: stroke-opacity 0.2s, stroke-width 0.2s;

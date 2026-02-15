@@ -1,11 +1,15 @@
 /*
 ══════════════════════════════════════════════════════════════════
-panel.js
-──────────────────────────────────────────────────────────────────
+panel.js  →  resources/static/js/panel.js
+══════════════════════════════════════════════════════════════════
 Responsabilidad única: gestionar el panel lateral de información.
 
 Este módulo no sabe nada de D3 ni del grafo. Solo recibe un
 objeto de datos y actualiza el DOM del panel lateral.
+
+Al mostrar un nodo, llama al endpoint /api/apps/{siteId} para
+obtener las apps relacionadas desde la base de datos y las
+muestra debajo de la información del nodo.
 
 Exporta:
   showNodePanel(node, kmsBySite)
@@ -22,6 +26,7 @@ const panelBody = document.getElementById('panel-body');
 /**
  * Muestra la información de un nodo (CN o QN) en el panel.
  * Si es QN, también lista sus KMS internos.
+ * Siempre busca en la BD las apps relacionadas con el site.
  *
  * @param {Object} node      - Datos del nodo seleccionado
  * @param {Object} kmsBySite - Mapa site → array de KMS
@@ -43,6 +48,8 @@ export function showNodePanel(node, kmsBySite) {
   // Tarjetas de KMS: solo para nodos QN
   const kmsHtml = _buildKmsCards(isQN, node.site, kmsBySite);
 
+  // Renderizamos la info estática del nodo con un placeholder para las apps.
+  // Las apps se rellenan cuando llega la respuesta del servidor.
   panelBody.innerHTML = `
     <span class="type-badge ${isQN ? 'badge-qn' : 'badge-cn'}">
       ${isQN ? 'Nodo kuantikoa' : 'Nodo klasikoa'}
@@ -51,7 +58,14 @@ export function showNodePanel(node, kmsBySite) {
     <div class="section-label">Ezaugarriak</div>
     <table class="info-table">${rows}</table>
     ${kmsHtml}
+    <div class="section-label">Aplikazioak</div>
+    <div id="apps-container">
+      <div class="apps-loading">Aplikazioak kargatzen…</div>
+    </div>
   `;
+
+  // Llamamos al endpoint y rellenamos #apps-container cuando llegue la respuesta
+  _fetchApps(node.site);
 }
 
 
@@ -101,7 +115,7 @@ export function clearPanel() {
       <div class="empty-icon">◎</div>
       <div class="empty-text">Ez dago ezer hautatuta</div>
       <div class="empty-hint">
-        Klik egin nodo batean<br>edo lotura batean<br> dituzten propietateak ikusteko
+        Klik egin nodo batean<br>edo lotura batean<br>dituzten propietateak ikusteko
       </div>
     </div>
   `;
@@ -137,4 +151,48 @@ function _buildKmsCards(isQN, site, kmsBySite) {
   `).join('');
 
   return `<div class="section-label">Barneko KMS-ak</div>${cards}`;
+}
+
+/**
+ * Llama al endpoint /api/apps/{siteId} y rellena #apps-container
+ * con las tarjetas de las apps devueltas por la BD.
+ *
+ * Se hace después de renderizar el HTML del nodo para que el usuario
+ * vea la información inmediatamente y las apps aparezcan al llegar.
+ *
+ * @param {string} siteId - El site del nodo clickado (ej. "Site_A")
+ */
+function _fetchApps(siteId) {
+  fetch(`/api/apps/${siteId}`)
+    .then(response => {
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      return response.json();
+    })
+    .then(apps => {
+      const container = document.getElementById('apps-container');
+      if (!container) return; // el usuario puede haber clickado otro nodo ya
+
+      if (apps.length === 0) {
+        container.innerHTML = `<div class="apps-empty">Aplikaziorik ez dago erregistratuta</div>`;
+        return;
+      }
+
+      // Construimos una tarjeta por cada app devuelta por la BD
+      container.innerHTML = apps.map(app => `
+        <div class="app-card">
+          <div class="app-id">${app.id}</div>
+          <table class="info-table">
+            <tr><td>site</td><td>${app.siteId}</td></tr>
+            <tr><td>vKMS</td><td>${app.vkmsId}</td></tr>
+          </table>
+        </div>
+      `).join('');
+    })
+    .catch(err => {
+      console.error('Errorea aplikazioak kargatzean:', err);
+      const container = document.getElementById('apps-container');
+      if (container) {
+        container.innerHTML = `<div class="apps-empty">Errorea aplikazioak kargatzean</div>`;
+      }
+    });
 }

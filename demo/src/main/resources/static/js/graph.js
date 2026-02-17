@@ -2,13 +2,18 @@
 ══════════════════════════════════════════════════════════════════
 graph.js  →  resources/static/js/graph.js
 ══════════════════════════════════════════════════════════════════
-Gestiona el grafo D3: simulación de fuerzas, nodos y enlaces.
-Se comunica con el exterior únicamente a través de callbacks.
-
 Los enlaces clásicos se dibujan como <line> rectas.
 Los enlaces cuánticos se dibujan como <path> curvados, de forma
 que cuando ambos tipos conectan los mismos dos nodos sean
 visualmente distinguibles y clickables por separado.
+
+D3 grafoa kudeatzen du: indarren, nodoen eta loturen simulazioa.
+Kanpoaldearekin kallbacken bidez bakarrik komunikatzen da.
+
+Lotura klasikoak zuzen gisa marrazten dira. <line>
+Lotura kuantikoak kurba<path> marrazten dira, bi mota horiek bi 
+nodo berberak konektatzen dituztenean bisualki bereizteko eta 
+bereizita klikatzeko modukoak izan daitezen. 
 ══════════════════════════════════════════════════════════════════
 */
 
@@ -16,20 +21,20 @@ import { drawNodeIcon } from '/js/nodeIcon.js';
 
 const NODE_RADIUS = 32;
 
-// Curvatura del enlace cuántico: cuanto mayor, más pronunciado el arco.
-// Un valor entre 40-80 es suficiente para que se vea sin ser exagerado.
+// Lotura kuantikoen kurbatura: balio handiagoa → arku handiagoa.
+// 40-80 bitarteko balioa nahikoa da ikusteko, baina ez da gehiegizkoa. 
 const CURVE = 55;
 
 let simulation = null;
 
 
 /**
- * Dibuja el grafo completo en #graph-svg.
+ * Grafo osoa marrazten du #graph-svg erabiliz
  *
- * @param {Object}   data               - Datos procesados por dataProcessor
- * @param {Function} onNodeClick        - Callback: clic en nodo
- * @param {Function} onLinkClick        - Callback: clic en enlace
- * @param {Function} onBackgroundClick  - Callback: clic en fondo
+ * @param {Object}   data               - Datuak prozesatutak dataProcessor-ek emandako formatuan
+ * @param {Function} onNodeClick        - Callback: nodoan clicka
+ * @param {Function} onLinkClick        - Callback: loturan clicka
+ * @param {Function} onBackgroundClick  - Callback: fondoan clicka
  * @returns {{ highlightNode, highlightLink }}
  */
 export function renderGraph(data, onNodeClick, onLinkClick, onBackgroundClick) {
@@ -50,19 +55,19 @@ export function renderGraph(data, onNodeClick, onLinkClick, onBackgroundClick) {
 
   simulation = _createSimulation(visibleNodes, allValidLinks, W, H);
 
-  // Clásicos primero (quedan debajo), cuánticos encima
+  // Klasikoak lehenik (azpian geratzen dira), kuantikoak gainetik
   const classicalSel = _drawClassicalLinks(g, validClassical, onLinkClick);
   const quantumSel   = _drawQuantumLinks(g, validQuantum, onLinkClick);
 
   const nodeSel = _drawNodes(g, visibleNodes, onNodeClick);
 
   simulation.on('tick', () => {
-    // Líneas clásicas: actualizamos x1/y1/x2/y2 directamente
+    // Lotura klasikoak: x1/y1/x2/y2 atributuak eguneratzen dira zuzenean
     classicalSel
       .attr('x1', d => d.source.x).attr('y1', d => d.source.y)
       .attr('x2', d => d.target.x).attr('y2', d => d.target.y);
 
-    // Paths cuánticos: recalculamos el arco cuadrático en cada tick
+    // Lotura kuantikoak: tick bakoitzeko arku berria kalkulatzen da.
     quantumSel.attr('d', d => _arcPath(d.source, d.target, CURVE));
 
     nodeSel.attr('transform', d => `translate(${d.x}, ${d.y})`);
@@ -80,7 +85,7 @@ export function renderGraph(data, onNodeClick, onLinkClick, onBackgroundClick) {
 }
 
 
-/* ── Funciones privadas ─────────────────────────────────────── */
+/* ── Funtzio pribatuak ─────────────────────────────────────── */
 
 function _createSimulation(nodes, links, W, H) {
   return d3.forceSimulation(nodes)
@@ -90,7 +95,7 @@ function _createSimulation(nodes, links, W, H) {
     .force('collision', d3.forceCollide(NODE_RADIUS + 30));
 }
 
-/** Enlace clásico: <line> recta */
+/** Lotura klasikoak: <line>*/
 function _drawClassicalLinks(g, links, onLinkClick) {
   return g.append('g')
     .selectAll('line')
@@ -100,7 +105,7 @@ function _drawClassicalLinks(g, links, onLinkClick) {
     .on('click', (event, d) => { event.stopPropagation(); onLinkClick(d); });
 }
 
-/** Enlace cuántico: <path> con arco cuadrático */
+/** Lotura kuantikoak: <path> arku kuadratikoarekin*/
 function _drawQuantumLinks(g, links, onLinkClick) {
   return g.append('g')
     .selectAll('path')
@@ -111,23 +116,23 @@ function _drawQuantumLinks(g, links, onLinkClick) {
 }
 
 /**
- * Calcula el atributo "d" de un arco cuadrático entre dos puntos.
- * El punto de control se desplaza perpendicularmente a la línea
- * recta entre source y target, creando una curva suave.
+ * Bi punturen arteko kurba kuadratiko baten "d" atributua kalkulatzen du.
+ * Kontrol puntua source eta target-en erdian dago, baina offset distantzia duzuen paraleloan desplazatuta, kurbatura sortuz.
  *
- * @param {{x,y}} source  - Nodo origen
- * @param {{x,y}} target  - Nodo destino
- * @param {number} offset - Distancia del punto de control a la línea recta
+ * 
+ * @param {{x,y}} source  - Jatorriko nodoa
+ * @param {{x,y}} target  - Helmuga nodoa
+ * @param {number} offset - Kontrol-puntutik lerro zuzenera dagoen distantzia 
  */
 function _arcPath(source, target, offset) {
   const dx = target.x - source.x;
   const dy = target.y - source.y;
-  // Longitud de la línea recta entre los dos nodos
+  // Bi nodoen arteko lerro zuzenaren luzera
   const len = Math.sqrt(dx * dx + dy * dy) || 1;
-  // Punto de control perpendicular a la mitad del segmento
+  // Segmentuaren erdiarekiko perpendikularra den kontrol-puntua
   const mx  = (source.x + target.x) / 2 + (offset * -dy) / len;
   const my  = (source.y + target.y) / 2 + (offset *  dx) / len;
-  // Comando SVG: M = mover al origen, Q = curva cuadrática con punto de control
+  //SVG komandoa: M = jatorrira mugitu, Q = kurba kuadratikoa kontrol puntuekin
   return `M${source.x},${source.y} Q${mx},${my} ${target.x},${target.y}`;
 }
 
@@ -167,7 +172,7 @@ function _selectLink(id, classicalSel, quantumSel, nodeSel) {
   classicalSel.classed('selected', false);
   quantumSel.classed('selected', false);
   nodeSel.classed('selected', false);
-  // Buscamos en ambos selectores: el enlace puede ser clásico o cuántico
+  //Bi hautagailuetan bilatzen dugu: lotura klasikoa edo kuantikoa izan daiteke
   classicalSel.filter(l => l.id === id).classed('selected', true);
   quantumSel.filter(l => l.id === id).classed('selected', true);
 }

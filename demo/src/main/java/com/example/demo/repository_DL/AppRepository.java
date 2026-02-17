@@ -11,11 +11,11 @@ import com.example.demo.entity_DL.AppE;
 public interface AppRepository extends JpaRepository<AppE, String> {
 
     /*
-    Spring Data JPA genera la consulta SQL automáticamente a partir
-    del nombre del método. "findBy" + "SiteId" busca por la columna
-    site_id de la tabla APP.
+    Spring Data JPA-k SQL kontsulta automatikoki sortzen du metodoaren
+    izenetik abiatuta. "findBy" + "SiteId" APP taulako site_id
+    zutabearen arabera bilatzen du.
 
-    Equivale a: SELECT * FROM APP WHERE site_id = ?
+    Honen baliokidea da: SELECT * FROM APP WHERE site_id = ?
     */
     List<AppE> findBySiteId(String siteId);
 }

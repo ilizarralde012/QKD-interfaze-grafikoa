@@ -11,9 +11,9 @@ import com.example.demo.repository_DL.AppRepository;
 public class AppService {
 
     /*
-    Inyección de dependencias: Spring crea el AppRepository y lo
-    pasa automáticamente al constructor. Es la forma recomendada
-    frente a @Autowired en el campo.
+    Dependentzia-injekzioa: Spring-ek AppRepository sortzen du eta
+    automatikoki pasatzen dio konstruktoreari. Hau da modu gomendatua
+    @Autowired eremuan erabiltzearen aldean.
     */
     private final AppRepository appRepository;
 
@@ -22,10 +22,10 @@ public class AppService {
     }
 
     /**
-     * Devuelve todas las apps asociadas a un site.
+     * Site jakin bateko app guztiak itzultzen ditu.
      *
-     * @param siteId - El id del site (ej. "Site_A", "Site_D")
-     * @return Lista de AppE. Vacía si el site no tiene apps.
+     * @param siteId - Sitearen id-a (adib. "Site_A", "Site_D")
+     * @return AppE zerrenda. Hutsik dagoen kasuan.
      */
     public List<AppE> getAppsBySite(String siteId) {
         return appRepository.findBySiteId(siteId);

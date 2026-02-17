@@ -2,10 +2,10 @@
 ══════════════════════════════════════════════════════════════════
 nodeIcon.js  →  resources/static/js/nodeIcon.js
 ══════════════════════════════════════════════════════════════════
-Dibuja el icono SVG de cada nodo con formas geométricas y letras.
+SVG ikonoak marrazten ditu nodo bakoitzeko forma eta letrekin.
 
-  CN (Classical Node) → círculo azul con la letra "C"
-  QN (Quantum Node)   → cuadrado violeta con la letra "Q"
+  CN (Classical Node) → borobil urdina eta "C" letra batekin
+  QN (Quantum Node)   → karratu morea eta "Q" letra batekin
 ══════════════════════════════════════════════════════════════════
 */
 
@@ -13,14 +13,14 @@ const NODE_RADIUS = 32;
 
 
 /**
- * Dibuja el icono de un nodo dentro de su grupo D3.
+ * Nodo baten ikonoa marrazten du D3 multzo baten barruan.
  *
- * @param {d3.Selection} g        - Grupo D3 del nodo (<g>)
- * @param {string}       nodeType - "CN" o "QN"
+ * @param {d3.Selection} g        - D3 multzoa nodoarekin (<g>)
+ * @param {string}       nodeType - "CN" edo "QN"
  */
 export function drawNodeIcon(g, nodeType) {
 
-  // Área de clic invisible más grande que el icono para facilitar la interacción
+  // Click egiteko eremu ikustezina, ikonoaren baino handiagoa, interakzioa errazteko
   g.append('circle')
     .attr('class', 'node-hitarea')
     .attr('r', NODE_RADIUS + 16);
@@ -34,24 +34,24 @@ export function drawNodeIcon(g, nodeType) {
 
 
 /**
- * CN → círculo azul con la letra "C"
+ * CN → borobil urdina eta "C" letra batekin
  * @private
  */
 function _drawClassicalNode(g, r) {
-  // Anillo exterior punteado — visible al hacer hover o al seleccionar
+  // Kanpoko eraztun punteatua — ikusgarria hover egitean edo hautatzean
   g.append('circle')
     .attr('class', 'node-ring')
     .attr('r', r + 8)
     .attr('stroke', '#2563eb');
 
-  // Círculo principal
+  // Borobil nagusia
   g.append('circle')
     .attr('r', r)
     .attr('fill', '#eff6ff')
     .attr('stroke', '#2563eb')
     .attr('stroke-width', 2);
 
-  // Letra "C" centrada
+  // C letra erdian
   g.append('text')
     .attr('dy', 4)
     .attr('text-anchor', 'middle')
@@ -65,13 +65,13 @@ function _drawClassicalNode(g, r) {
 
 
 /**
- * QN → cuadrado violeta con la letra "Q"
+ * QN → karratu morea eta "Q" letra batekin
  * @private
  */
 function _drawQuantumNode(g, r) {
   const side = r * 1.6;
 
-  // Anillo exterior punteado cuadrado
+  // Kanpoko eraztun punteatu karratua — ikusgarria hover egitean edo hautatzean
   g.append('rect')
     .attr('class', 'node-ring')
     .attr('x', -(side / 2 + 8))
@@ -81,7 +81,7 @@ function _drawQuantumNode(g, r) {
     .attr('rx', 6)
     .attr('stroke', '#7c3aed');
 
-  // Cuadrado principal
+  // Karratu nagusia
   g.append('rect')
     .attr('x', -side / 2)
     .attr('y', -side / 2)
@@ -92,7 +92,7 @@ function _drawQuantumNode(g, r) {
     .attr('stroke', '#7c3aed')
     .attr('stroke-width', 2);
 
-  // Letra "Q" centrada
+  // "Q" letra zentratua
   g.append('text')
     .attr('dy', 4)
     .attr('text-anchor', 'middle')

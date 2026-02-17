@@ -5,42 +5,31 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Network Topology</title>
 
-  <!-- Fuentes de Google -->
+  <!-- Google-ko letrak -->
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 
-  <!-- Librería D3 desde CDN -->
+  <!-- D3 liburutegia CDNtik -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
 
-  <!--
-    Ruta del CSS: Spring Boot sirve todo lo que está en
-    resources/static/ directamente desde la raíz ("/").
-    → resources/static/css/style.css  =  /css/style.css
-  -->
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
 
-  <!-- ── BARRA SUPERIOR ── -->
+  <!-- ── GOIKO BARRA ── -->
   <header class="topbar">
     <span class="logo">Network Topology</span>
     <div class="topbar-sep"></div>
-    <!--
-      Los enlaces apuntan a los otros templates de Spring Boot.
-      Spring Boot los sirve desde /apps y /requests
-      según las rutas que definas en tu controller.
-    -->
     <a href="/apps"     class="nav-btn"><span class="nav-btn-icon">⊞</span>See Apps</a>
     <a href="/requests" class="nav-btn"><span class="nav-btn-icon">↔</span>See Requests</a>
   </header>
 
-  <!-- ── CONTENIDO PRINCIPAL ── -->
   <main class="main">
 
-    <!-- Canvas del grafo SVG -->
+    <!-- SVG grafoaren Canvas-a -->
     <div class="canvas-wrap">
       <svg id="graph-svg"></svg>
 
-      <!-- Leyenda -->
+      <!-- Aurkibidea -->
       <div class="legend">
         <div class="legend-title">Nodo motak</div>
         <div class="legend-row">
@@ -70,7 +59,7 @@
       </div>
     </div>
 
-    <!-- Panel lateral de información -->
+    <!-- Informaziorako panel laterala -->
     <aside class="side-panel">
 
       <div class="panel-header">
@@ -78,7 +67,7 @@
         Informazioa
       </div>
 
-      <!-- Estadísticas: los valores los rellena main.js -->
+      <!-- Estatistikak -->
       <div class="stats-block">
         <div class="stat-cell">
           <div class="stat-label">
@@ -110,16 +99,11 @@
         </div>
       </div>
 
-      <!-- Cuerpo dinámico: panel.js inyecta aquí el contenido -->
+      <!-- Panel dinamikoa -->
       <div class="panel-body" id="panel-body"></div>
 
     </aside>
   </main>
-
-  <!--
-    type="module" activa el sistema de imports/exports entre archivos JS.
-    La ruta es absoluta → resources/static/js/main.js = /js/main.js
-  -->
   <script type="module" src="/js/main.js"></script>
 
 </body>

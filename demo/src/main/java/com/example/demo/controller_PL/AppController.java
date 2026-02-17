@@ -14,8 +14,8 @@ import com.example.demo.service_BL.AppService;
 @RestController
 
 /*
-@RequestMapping define el prefijo de todas las rutas de este controller.
-Usamos /api/ para separar los endpoints de datos de las páginas HTML.
+@RequestMapping kontroladore honen bide guztien aurrizkia definitzen du.
+/api/ erabiltzen dugu datu-endpointak HTML orrialdeetatik bereizteko.
 */
 @RequestMapping("/api")
 public class AppController {
@@ -27,15 +27,15 @@ public class AppController {
     }
 
     /**
-     * Devuelve en JSON todas las apps de un site concreto.
+     * Site jakin bateko app guztiak JSON formatuan itzultzen ditu.
      *
-     * Ejemplo de llamada desde el navegador o desde JS:
-     *   GET /api/apps/Site_A   → apps del Site_A
-     *   GET /api/apps/Site_D   → apps del Site_D
+     * Nabigatzailetik edo JS-tik deitzeko adibidea:
+     *   GET /api/apps/Site_A   → Site_A-ko appak
+     *   GET /api/apps/Site_D   → Site_D-ko appak
      *
-     * @param siteId - Viene de la URL, ej. "Site_A"
-     * @return 200 OK con la lista de apps en JSON
-     *         200 OK con lista vacía [] si el site no tiene apps
+     * @param siteId - URLtik dator, adib. "Site_A"
+     * @return 200 OK app zerrenda JSON formatuan
+     *         00 OK zerrenda hutsarekin [] siteak appik ez badu
      */
     @GetMapping("/apps/{siteId}")
     public ResponseEntity<List<AppE>> getAppsBySite(@PathVariable String siteId) {

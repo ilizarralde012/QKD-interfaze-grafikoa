@@ -2,25 +2,18 @@
 ══════════════════════════════════════════════════════════════════
 main.js  →  resources/static/js/main.js
 ══════════════════════════════════════════════════════════════════
-Punto de entrada. Orquesta los demás módulos.
-
-Spring Boot sirve los archivos de resources/static/ con rutas
-absolutas desde "/", por eso todos los imports usan /js/...
-══════════════════════════════════════════════════════════════════
+Beste modulu guztien sarrera.
+Spring Boot-ek resources/static/ direktorioan dauden fitxategiak zerbitzatzen ditu, beraz JS fitxategiak /js/ izeneko path-etik eskuragarri daude.
 */
 
 import { processData }                            from '/js/dataProcessor.js';
 import { renderGraph }                            from '/js/graph.js';
 import { showNodePanel, showLinkPanel, clearPanel } from '/js/panel.js';
 
-/*
-  Ruta del JSON: Spring Boot sirve resources/static/data/ en /data/
-  → resources/static/data/architecture.json = /data/architecture.json
-*/
 const JSON_PATH = '/data/architecture.json';
 
 
-/* ── Función principal ───────────────────────────────────────── */
+/*  Oinarrizko funtzioa */
 function init(rawData) {
   const processedData = processData(rawData);
   const { visibleNodes, classicalLinks, quantumLinks, kmsBySite } = processedData;
@@ -35,12 +28,12 @@ function init(rawData) {
     ()     => { clearPanel(); }
   );
 
-  // Re-renderizamos si cambia el tamaño de la ventana
+  // Leihoaren tamaina aldatzean grafikoa berriz margotzeko, datu prozesatuak berrerabiliz.
   window.addEventListener('resize', () => init(rawData));
 }
 
 
-/* ── Carga del JSON desde Spring Boot ───────────────────────── */
+/* Spring Bootetik JSONaren karga  */
 function loadJSON() {
   fetch(JSON_PATH)
     .then(response => {
@@ -49,13 +42,13 @@ function loadJSON() {
     })
     .then(data => init(data))
     .catch(err => {
-      console.error('Error cargando el JSON:', err);
+      console.error('Errorea JSONa kargatzean:', err);
       document.getElementById('panel-body').innerHTML = `
         <div class="empty-state">
           <div class="empty-icon">⚠</div>
-          <div class="empty-text">No se pudo cargar el JSON</div>
+          <div class="empty-text">Ezin izan da JSON fitxategia kargatu</div>
           <div class="empty-hint">
-            Archivo esperado en:<br>
+            Esperatutako fitxategia:<br>
             <code>resources/static/data/architecture.json</code>
           </div>
         </div>`;
@@ -63,7 +56,7 @@ function loadJSON() {
 }
 
 
-/* ── Actualizar estadísticas del panel ──────────────────────── */
+/*  Estatistikak eguneratzea panelean  */
 function _updateStats(nodes, classicalLinks, quantumLinks) {
   document.getElementById('stat-cn').textContent = nodes.filter(n => n.node_type === 'CN').length;
   document.getElementById('stat-qn').textContent = nodes.filter(n => n.node_type === 'QN').length;
@@ -72,5 +65,5 @@ function _updateStats(nodes, classicalLinks, quantumLinks) {
 }
 
 
-/* ── Inicio ──────────────────────────────────────────────────── */
+/* Hasiera */
 window.addEventListener('load', loadJSON);

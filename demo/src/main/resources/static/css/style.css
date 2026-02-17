@@ -2,23 +2,23 @@
 ══════════════════════════════════════════════════════════════════
 style.css  →  resources/static/css/style.css
 ══════════════════════════════════════════════════════════════════
-Spring Boot sirve este archivo en: /css/style.css
+Spring Boot-ek fitxategi hau zerbitzatzen du: /css/style.css
 
-Estructura:
-  1. Variables
-  2. Reset y base
+Egitura:
+  1. Aldagaiak
+  2. Reset eta oinarria
   3. Topbar
-  4. Layout principal
-  5. Canvas y leyenda
-  6. Panel lateral
-  7. Estadísticas
-  8. Contenido del panel
-  9. Elementos SVG del grafo
+  4. Layout nagusia
+  5. Canvas eta aurkibidea
+  6. Alboko panela
+  7. Estatistikak
+  8. Panelaren edukia
+  9. Grafoaren SVG elementuak
 ══════════════════════════════════════════════════════════════════
 */
 
 
-/* ── 1. VARIABLES ──────────────────────────────────────────────── */
+/* ── 1. ALDAGAIAK ──────────────────────────────────────────────── */
 :root {
   --bg:         #f5f6fa;
   --panel-bg:   #ffffff;
@@ -43,7 +43,7 @@ Estructura:
 }
 
 
-/* ── 2. RESET Y BASE ───────────────────────────────────────────── */
+/* ── 2. RESET ETA OINARRIA ─────────────────────────────────────── */
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
@@ -107,7 +107,7 @@ body {
 }
 
 
-/* ── 4. LAYOUT PRINCIPAL ───────────────────────────────────────── */
+/* ── 4. LAYOUT NAGUSIA ─────────────────────────────────────────── */
 .main {
   display: flex;
   flex: 1;
@@ -115,7 +115,7 @@ body {
 }
 
 
-/* ── 5. CANVAS Y LEYENDA ───────────────────────────────────────── */
+/* ── 5. CANVAS ETA AURKIBIDEA ────────────────────────────────────── */
 .canvas-wrap {
   flex: 1;
   position: relative;
@@ -178,7 +178,7 @@ body {
 }
 
 
-/* ── 6. PANEL LATERAL ──────────────────────────────────────────── */
+/* ── 6. ALBOKO PANELA ──────────────────────────────────────────── */
 .side-panel {
   width: 320px;
   flex-shrink: 0;
@@ -224,7 +224,7 @@ body {
 }
 
 
-/* ── 7. ESTADÍSTICAS ───────────────────────────────────────────── */
+/* ── 7. ESTATISTIKAK ───────────────────────────────────────────── */
 .stats-block {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -265,7 +265,7 @@ body {
 }
 
 
-/* ── 8. CONTENIDO DEL PANEL ────────────────────────────────────── */
+/* ── 8. PANELAREN EDUKIA ───────────────────────────────────────── */
 .empty-state {
   display: flex;
   flex-direction: column;
@@ -357,7 +357,7 @@ body {
   word-break: break-all;
 }
 
-/* ── Tarjetas de Apps ──────────────────────────────────────────── */
+/* ── App Txartelak ─────────────────────────────────────────────── */
 .app-card {
   background: var(--cn-bg);
   border: 1px solid var(--cn-border);
@@ -373,7 +373,7 @@ body {
   margin-bottom: 6px;
 }
 
-/* Texto cuando no hay apps o hay error al cargarlas */
+/* Appik ez dagoenean edo kargatzean errore bat dagoenean agertzen den testua */
 .apps-empty {
   font-size: 12px;
   color: var(--text-muted);
@@ -381,7 +381,7 @@ body {
   padding: 4px 0;
 }
 
-/* Texto de carga mientras espera la respuesta del servidor */
+/* Zerbitzariaren erantzuna zain dagoen bitartean agertzen den karga-testua */
 .apps-loading {
   font-size: 12px;
   color: var(--text-muted);
@@ -389,11 +389,11 @@ body {
 }
 
 
-/* ── 9. ELEMENTOS SVG DEL GRAFO ────────────────────────────────── */
+/* ── 9. GRAFOAREN SVG ELEMENTUAK ───────────────────────────────── */
 .node-g { cursor: pointer; }
 .node-hitarea { fill: transparent; stroke: none; }
 
-/* Anillo de selección: aparece al hacer hover o al seleccionar el nodo */
+/* Hautapen-eraztuna: hover egitean edo nodoa hautatzean agertzen da */
 .node-ring {
   fill: none;
   stroke-width: 2;

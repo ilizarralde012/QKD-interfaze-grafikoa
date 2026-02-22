@@ -19,7 +19,7 @@ public class SessionL1DetailsE {
     private String kms_dst_id;
 
     @OneToOne
-    @MapsId // Indica que el ID de esta entidad se deriva de la entidad Session
+    @MapsId 
     @JoinColumn(name = "SESSION_id")
     private SessionE session;
 

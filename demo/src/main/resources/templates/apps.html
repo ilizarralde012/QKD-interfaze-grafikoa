@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aplikazioak - Network Topology</title>
+
+  <!-- Google-ko letrak -->
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <!-- ── GOIKO BARRA ── -->
+  <header class="topbar">
+    <span class="logo">Registered Applications</span>
+    <div class="topbar-sep"></div>
+    <a href="/"         class="nav-btn"><span class="nav-btn-icon">◎</span> See network topology</a>
+    <a href="/requests" class="nav-btn"><span class="nav-btn-icon">↔</span> See requests</a>
+  </header>
+
+  <!-- Taula -->
+  <main class="apps-main">
+    <h1>Aplikazioak</h1>
+    
+    <!-- Taularen edukiontzia -->
+<div class="table-container">
+  
+  <!-- Izenburu eta kontagailu goiburua -->
+  <div class="table-header">
+    <h2>Zerrenda</h2>
+    <div class="app-count">
+      <span id="app-count-number">—</span> aplikazio
+    </div>
+  </div>
+
+  <!-- Taula -->
+  <table class="apps-table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Site</th>
+        <th>vKMS</th>
+        <th>Requests</th>
+      </tr>
+    </thead>
+    <tbody id="apps-table-body">
+      <!-- Las filas se llenarán con JavaScript -->
+      <tr class="loading-row">
+        <td colspan="4">Datuak kargatzen...</td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+    
+  </main>
+<script>
+
+// Orrialdea kargatzean, datuak eskatu
+window.addEventListener('load', () => {
+  loadApps();
+});
+
+/**
+ * API-tik app guztiak kargatu eta taulan erakutsi
+ */
+function loadApps() {
+  fetch('/api/apps')
+    .then(response => {
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      return response.json();
+    })
+    .then(apps => {
+      renderAppsTable(apps);
+      updateAppCount(apps.length);
+    })
+    .catch(error => {
+      console.error('Errorea aplikazioak kargatzean:', error);
+      showError();
+    });
+}
+
+ // App-en zerrenda taulan bistaratu
+ 
+function renderAppsTable(apps) {
+  const tbody = document.getElementById('apps-table-body');
+  
+  // Taularen edukina garbitu (loading mezua kendu)
+  tbody.innerHTML = '';
+  
+  // App bakoitzeko errenkada bat sortu
+  apps.forEach(app => {
+    const row = document.createElement('tr');
+    
+    row.innerHTML = `
+      <td>${app.id}</td>
+      <td>${app.siteId || '—'}</td>
+      <td>${app.vkmsId || '—'}</td>
+      <td>${app.requestCount}</td>
+    `;
+    
+    tbody.appendChild(row);
+  });
+}
+
+ // App kopurua eguneratu goiburuan
+
+function updateAppCount(count) {
+  document.getElementById('app-count-number').textContent = count;
+}
+
+ // Errore mezua erakutsi datuen karga huts egiten badu
+
+function showError() {
+  const tbody = document.getElementById('apps-table-body');
+  tbody.innerHTML = `
+    <tr class="loading-row">
+      <td colspan="4">Errorea datuak kargatzean</td>
+    </tr>
+  `;
+}
+
+</script>
+</body>
+</html>

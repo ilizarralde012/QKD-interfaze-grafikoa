@@ -17,7 +17,7 @@ public class SessionE {
     private String id;
 
     @Column(length = 45)
-    private String status; // Ahora es VARCHAR(45) como acordamos
+    private String status; 
 
     @Column(name = "start_time")
     private LocalDateTime startTime;
@@ -25,17 +25,14 @@ public class SessionE {
     @Column(name = "end_time")
     private LocalDateTime endTime;
 
-    // Relación con la App que inicia
     @ManyToOne
     @JoinColumn(name = "init_app_id", nullable = false)
     private AppE initApp;
 
-    // Relación con la App objetivo
     @ManyToOne
     @JoinColumn(name = "target_app_id", nullable = false)
     private AppE targetApp;
 
-    // Relación con el nivel de seguridad
     @ManyToOne
     @JoinColumn(name = "security_level", nullable = false)
     private SecurityLevelE securityLevel;

@@ -10,24 +10,30 @@ import com.example.demo.repository_DL.AppRepository;
 @Service
 public class AppService {
 
-    /*
-    Dependentzia-injekzioa: Spring-ek AppRepository sortzen du eta
-    automatikoki pasatzen dio konstruktoreari. Hau da modu gomendatua
-    @Autowired eremuan erabiltzearen aldean.
-    */
     private final AppRepository appRepository;
+    private final SessionService sessionService;  // BERRIA: SessionService injektatu
 
-    public AppService(AppRepository appRepository) {
+    // Constructor - bi dependentziak jasotzen ditu orain
+    public AppService(AppRepository appRepository, SessionService sessionService) {
         this.appRepository = appRepository;
+        this.sessionService = sessionService;
+    }
+
+    public List<AppE> getAppsBySite(String siteId) {
+        return appRepository.findBySiteId(siteId);
+    }
+
+    public List<AppE> getAllApps() {
+        return appRepository.findAll();
     }
 
     /**
-     * Site jakin bateko app guztiak itzultzen ditu.
-     *
-     * @param siteId - Sitearen id-a (adib. "Site_A", "Site_D")
-     * @return AppE zerrenda. Hutsik dagoen kasuan.
+     * App baten request kopurua kalkulatzen du.
+     * 
+     * @param appId - Aplikazioaren IDa
+     * @return Request kopurua
      */
-    public List<AppE> getAppsBySite(String siteId) {
-        return appRepository.findBySiteId(siteId);
+    public Long getRequestCountForApp(String appId) {
+        return sessionService.countRequestsByApp(appId);
     }
 }

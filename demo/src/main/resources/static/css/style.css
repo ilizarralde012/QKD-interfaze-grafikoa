@@ -435,3 +435,113 @@ body {
 }
 .link-quantum:hover    { stroke-opacity: 1; stroke-width: 7; }
 .link-quantum.selected { stroke-opacity: 1; stroke-width: 7; }
+
+
+.apps-main {
+  padding: 32px 48px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.apps-main h1 {
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--heading);
+  margin-bottom: 24px;
+}
+
+.table-container {
+  background: var(--panel-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+}
+
+.table-header h2 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--heading);
+  margin: 0;
+}
+
+.app-count {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+#app-count-number {
+  font-weight: 600;
+  color: var(--cn-color);
+  font-size: 15px;
+}
+
+.apps-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.apps-table thead {
+  background: var(--bg);
+  border-bottom: 2px solid var(--border);
+}
+
+.apps-table th {
+  text-align: left;
+  padding: 12px 24px;
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.apps-table tbody tr {
+  border-bottom: 1px solid var(--border);
+  transition: background 0.15s;
+}
+
+.apps-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.apps-table tbody tr:hover {
+  background: var(--bg);
+}
+
+.apps-table td {
+  padding: 16px 24px;
+  color: var(--text);
+}
+
+.apps-table td:first-child {
+  font-family: var(--mono);
+  font-weight: 600;
+  color: var(--heading);
+}
+
+.apps-table td:last-child {
+  text-align: center;
+  font-family: var(--mono);
+  font-weight: 600;
+  color: var(--cn-color);
+}
+
+.loading-row td {
+  text-align: center;
+  padding: 48px 24px;
+  color: var(--text-muted);
+  font-style: italic;
+}

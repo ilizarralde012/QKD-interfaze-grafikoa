@@ -9,12 +9,7 @@ import com.example.demo.entity_DL.SessionE;
 @Repository
 public interface SessionRepository extends JpaRepository<SessionE, String> {
 
-    /**
-     * App batek hasitako sesio kopurua kontatzen du.
-     * 
-     * @param appId - Aplikazioaren IDa
-     * @return Sesio kopurua (Long motakoa)
-     */
+    // App batek hasitako sesio kopurua
     @Query("SELECT COUNT(s) FROM SessionE s WHERE s.initApp.id = :appId")
     Long countByInitAppId(String appId);
 }

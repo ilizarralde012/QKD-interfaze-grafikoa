@@ -1,24 +1,13 @@
 /*
-══════════════════════════════════════════════════════════════════
+══════════════════════════════════════════════════════════════
 style.css  →  resources/static/css/style.css
-══════════════════════════════════════════════════════════════════
-Spring Boot-ek fitxategi hau zerbitzatzen du: /css/style.css
-
-Egitura:
-  1. Aldagaiak
-  2. Reset eta oinarria
-  3. Topbar
-  4. Layout nagusia
-  5. Canvas eta aurkibidea
-  6. Alboko panela
-  7. Estatistikak
-  8. Panelaren edukia
-  9. Grafoaren SVG elementuak
-══════════════════════════════════════════════════════════════════
+══════════════════════════════════════════════════════════════
+Aplikazioaren estilo guztiak
+══════════════════════════════════════════════════════════════
 */
 
 
-/* ── 1. ALDAGAIAK ──────────────────────────────────────────────── */
+/* ── ALDAGAIAK ──────────────────────────────────────────────── */
 :root {
   --bg:         #f5f6fa;
   --panel-bg:   #ffffff;
@@ -43,7 +32,7 @@ Egitura:
 }
 
 
-/* ── 2. RESET ETA OINARRIA ─────────────────────────────────────── */
+/* ── RESET ETA OINARRIA ─────────────────────────────────────── */
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
@@ -61,7 +50,7 @@ body {
 }
 
 
-/* ── 3. TOPBAR ─────────────────────────────────────────────────── */
+/* ── TOPBAR ─────────────────────────────────────────────────── */
 .topbar {
   display: flex;
   align-items: center;
@@ -94,6 +83,7 @@ body {
   font-size: 13px;
   font-weight: 500;
   text-decoration: none;
+  cursor: pointer;
   transition: background 0.15s, border-color 0.15s, color 0.15s;
 }
 .nav-btn:hover {
@@ -107,7 +97,7 @@ body {
 }
 
 
-/* ── 4. LAYOUT NAGUSIA ─────────────────────────────────────────── */
+/* ── LAYOUT NAGUSIA ─────────────────────────────────────────── */
 .main {
   display: flex;
   flex: 1;
@@ -115,7 +105,7 @@ body {
 }
 
 
-/* ── 5. CANVAS ETA AURKIBIDEA ────────────────────────────────────── */
+/* ── CANVAS ETA LEYENDA ─────────────────────────────────────── */
 .canvas-wrap {
   flex: 1;
   position: relative;
@@ -178,7 +168,7 @@ body {
 }
 
 
-/* ── 6. ALBOKO PANELA ──────────────────────────────────────────── */
+/* ── ALBOKO PANELA ──────────────────────────────────────────── */
 .side-panel {
   width: 320px;
   flex-shrink: 0;
@@ -224,7 +214,7 @@ body {
 }
 
 
-/* ── 7. ESTATISTIKAK ───────────────────────────────────────────── */
+/* ── ESTATISTIKAK ───────────────────────────────────────────── */
 .stats-block {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -265,7 +255,7 @@ body {
 }
 
 
-/* ── 8. PANELAREN EDUKIA ───────────────────────────────────────── */
+/* ── PANELEKO EDUKIA ────────────────────────────────────────── */
 .empty-state {
   display: flex;
   flex-direction: column;
@@ -357,7 +347,7 @@ body {
   word-break: break-all;
 }
 
-/* ── App Txartelak ─────────────────────────────────────────────── */
+/* App txartelak */
 .app-card {
   background: var(--cn-bg);
   border: 1px solid var(--cn-border);
@@ -373,7 +363,6 @@ body {
   margin-bottom: 6px;
 }
 
-/* Appik ez dagoenean edo kargatzean errore bat dagoenean agertzen den testua */
 .apps-empty {
   font-size: 12px;
   color: var(--text-muted);
@@ -381,7 +370,6 @@ body {
   padding: 4px 0;
 }
 
-/* Zerbitzariaren erantzuna zain dagoen bitartean agertzen den karga-testua */
 .apps-loading {
   font-size: 12px;
   color: var(--text-muted);
@@ -389,11 +377,10 @@ body {
 }
 
 
-/* ── 9. GRAFOAREN SVG ELEMENTUAK ───────────────────────────────── */
+/* ── SVG GRAFOKO ELEMENTUAK ─────────────────────────────────── */
 .node-g { cursor: pointer; }
 .node-hitarea { fill: transparent; stroke: none; }
 
-/* Hautapen-eraztuna: hover egitean edo nodoa hautatzean agertzen da */
 .node-ring {
   fill: none;
   stroke-width: 2;
@@ -436,6 +423,10 @@ body {
 .link-quantum:hover    { stroke-opacity: 1; stroke-width: 7; }
 .link-quantum.selected { stroke-opacity: 1; stroke-width: 7; }
 
+
+/* ══════════════════════════════════════════════════════════════
+   APPS ORRIA
+   ══════════════════════════════════════════════════════════════ */
 
 .apps-main {
   padding: 32px 48px;
@@ -526,12 +517,14 @@ body {
   color: var(--text);
 }
 
+/* Lehen zutabea - ID */
 .apps-table td:first-child {
   font-family: var(--mono);
   font-weight: 600;
   color: var(--heading);
 }
 
+/* Azken zutabea - Requests */
 .apps-table td:last-child {
   text-align: center;
   font-family: var(--mono);

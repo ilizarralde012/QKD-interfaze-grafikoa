@@ -13,12 +13,7 @@ public class SessionService {
         this.sessionRepository = sessionRepository;
     }
 
-    /**
-     * App batek hasitako request kopurua kalkulatzen du.
-     * 
-     * @param appId - Aplikazioaren IDa
-     * @return Request kopurua
-     */
+    // App batek hasitako request kopurua
     public Long countRequestsByApp(String appId) {
         return sessionRepository.countByInitAppId(appId);
     }

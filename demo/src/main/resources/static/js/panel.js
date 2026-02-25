@@ -1,19 +1,9 @@
-/*
-══════════════════════════════════════════════════════════════════
-panel.js  →  resources/static/js/panel.js
-══════════════════════════════════════════════════════════════════
-Erantzukizun bakarra: alboko informazio-panela kudeatzea 
-
-
-Nodo bat erakustean, endpoint/api/apps/{siteId} delakora deitzen du,
-datu-basetik lotutako app-ak eta nodoaren informazioaren azpiko laginak lortzeko.
-
-Exporta:
-  showNodePanel(node, kmsBySite)
-  showLinkPanel(link)
-  clearPanel()
-══════════════════════════════════════════════════════════════════
-*/
+// ══════════════════════════════════════════════════════════════
+// panel.js
+// ──────────────────────────────────────────────────────────────
+// Alboko panelaren edukia kudeatu
+// Nodo/lotura bat klikatzen denean, bere informazioa erakutsi
+// ══════════════════════════════════════════════════════════════
 
 
 const panelDot  = document.getElementById('panel-dot');
@@ -80,6 +70,7 @@ export function showLinkPanel(link) {
   const srcId = _resolveId(link.source);
   const tgtId = _resolveId(link.target);
 
+  // Lotura kuantikoek KMS informazio gehigarria erakutsi
   const kmsRows = isQuantum ? `
     <tr><td>Jatorrizko KMS-a</td><td>${link.kms_source || '—'}</td></tr>
     <tr><td>Helmuga KMS-a</td><td>${link.kms_target || '—'}</td></tr>
@@ -123,6 +114,8 @@ export function clearPanel() {
 /**
  * D3k source/target string objektu bihur dezake simulazioan zehar. Funtzio horrek beti itzultzen du id string gisa.
  * @private
+ * @param {String|Object} val - "Site_A" edo {id: "Site_A", ...}
+ * @returns {String} - Beti ID string-a
  */
 function _resolveId(sourceOrTarget) {
   return typeof sourceOrTarget === 'object'
@@ -134,16 +127,22 @@ function _resolveId(sourceOrTarget) {
  * KMS txartelen HTML-a eraikitzen du QN nodo batentzat. 
  * String-a hutsik uzten du CN bada edo KMSak ez baditu
  * @private
+ * @param {Boolean} isQN - Nodo kuantikoa bada true
+ * @param {String} site - Site ID-a
+ * @param {Object} kmsBySite - Site bakoitzeko KMS array-a
+ * @returns {String} - KMS txartelen HTML-a (edo string hutsa)
  */
 function _buildKmsCards(isQN, site, kmsBySite) {
   if (!isQN || !kmsBySite[site]) return '';
 
+  // .map() array bat beste batera transformatzen du
+  // Kasu honetan: KMS objektuak → HTML string-ak
   const cards = kmsBySite[site].map(kms => `
     <div class="kms-card">
       <div class="kms-id">${kms.id}</div>
       <div class="kms-addr">${kms.address || '—'}</div>
     </div>
-  `).join('');
+  `).join(''); // Array guztia string bakar batean batu
 
   return `<div class="section-label">Barneko KMS-ak</div>${cards}`;
 }
@@ -154,6 +153,7 @@ function _buildKmsCards(isQN, site, kmsBySite) {
  * 
  * HTMLa renderizatu eta geroago deitzen da endpointa, erabiltzaileak 
  * informazioa ikusi dezan berehala eta aplikazioak iristen direnean ager daitezen.
+ * @private
  * @param {string} siteId - Clickatutako Sitea 
  */
 function _fetchApps(siteId) {
@@ -165,7 +165,8 @@ function _fetchApps(siteId) {
     .then(apps => {
       const container = document.getElementById('apps-container');
       if (!container) return; // erabiltzaileak beste nodo bat clickatu ahal izan du
-
+      
+      // Ez badago appik, mezu bat erakutsi
       if (apps.length === 0) {
         container.innerHTML = `<div class="apps-empty">Aplikaziorik ez dago erregistratuta</div>`;
         return;

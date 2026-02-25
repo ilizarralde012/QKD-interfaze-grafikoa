@@ -1,13 +1,10 @@
-/*
-══════════════════════════════════════════════════════════════════
-nodeIcon.js  →  resources/static/js/nodeIcon.js
-══════════════════════════════════════════════════════════════════
-SVG ikonoak marrazten ditu nodo bakoitzeko forma eta letrekin.
-
-  CN (Classical Node) → borobil urdina eta "C" letra batekin
-  QN (Quantum Node)   → karratu morea eta "Q" letra batekin
-══════════════════════════════════════════════════════════════════
-*/
+// ══════════════════════════════════════════════════════════════
+// nodeIcon.js
+// ──────────────────────────────────────────────────────────────
+// Nodo bakoitzaren ikono bisuala marraztu SVG-n
+// CN → zirkulua urdina + "C" letra
+// QN → karratua morea + "Q" letra
+// ══════════════════════════════════════════════════════════════
 
 const NODE_RADIUS = 32;
 
@@ -20,7 +17,9 @@ const NODE_RADIUS = 32;
  */
 export function drawNodeIcon(g, nodeType) {
 
-  // Click egiteko eremu ikustezina, ikonoaren baino handiagoa, interakzioa errazteko
+  // ── HITAREA ──────────────────────────────────────────────────
+  // Zirkulu ikusezin handi bat nodoaren gainean
+  // Erabiltzaileak "airean" klik egin dezake eta nodoa hautatuko da
   g.append('circle')
     .attr('class', 'node-hitarea')
     .attr('r', NODE_RADIUS + 16);

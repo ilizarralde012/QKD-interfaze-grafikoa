@@ -1,10 +1,9 @@
-/*
-══════════════════════════════════════════════════════════════════
-main.js  →  resources/static/js/main.js
-══════════════════════════════════════════════════════════════════
-Beste modulu guztien sarrera.
-Spring Boot-ek resources/static/ direktorioan dauden fitxategiak zerbitzatzen ditu, beraz JS fitxategiak /js/ izeneko path-etik eskuragarri daude.
-*/
+// ══════════════════════════════════════════════════════════════
+// main.js
+// ──────────────────────────────────────────────────────────────
+// Orkestratzaile nagusia: modulu guztiak konektatu
+// Logika propioa ez du ia, beste guztiak deitzen ditu bakarrik
+// ══════════════════════════════════════════════════════════════
 
 import { processData }                            from '/js/dataProcessor.js';
 import { renderGraph }                            from '/js/graph.js';
@@ -15,12 +14,26 @@ const JSON_PATH = '/data/architecture.json';
 
 /*  Oinarrizko funtzioa */
 function init(rawData) {
+  // ── 1. DATUAK PROZESATU ─────────────────────────────────────
   const processedData = processData(rawData);
   const { visibleNodes, classicalLinks, quantumLinks, kmsBySite } = processedData;
 
+  // ── 2. ESTATISTIKAK EGUNERATU ───────────────────────────────
+  // Panel goiburuko 4 zenbakiak (CN, QN, lotura klasikoak, kuantikoak)
   _updateStats(visibleNodes, classicalLinks, quantumLinks);
+
+  // ── 3. PANELA GARBITU ────────────────────────────────────────
+  // Hasieran "Ezer ez dago hautatuta" mezua erakutsi
   clearPanel();
 
+  // ── 4. GRAFOA MARRAZTU ───────────────────────────────────────
+  // graph.js-k 3 callback funtzio behar ditu:
+  //   - onNodeClick: nodo batean klik → zer egin
+  //   - onLinkClick: lotura batean klik → zer egin
+  //   - onBackgroundClick: atzeko planoan klik → zer egin
+  // 
+  // Callback hauek graph.js eta panel.js konektatzen dituzte
+  // (biak ez dute elkar ezagutzen, main.js bitartekoa da)
   const graph = renderGraph(
     processedData,
     (node) => { graph.highlightNode(node.id); showNodePanel(node, kmsBySite); },
@@ -28,7 +41,9 @@ function init(rawData) {
     ()     => { clearPanel(); }
   );
 
-  // Leihoaren tamaina aldatzean grafikoa berriz margotzeko, datu prozesatuak berrerabiliz.
+  // ── 5. WINDOW RESIZE ─────────────────────────────────────────
+  // Leihoaren tamaina aldatzen bada, grafoa birmarraztu
+  // (Oharra: hau errepikatu egingo da aldaketa bakoitzean)
   window.addEventListener('resize', () => init(rawData));
 }
 

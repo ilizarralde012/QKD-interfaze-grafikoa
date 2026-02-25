@@ -1,31 +1,18 @@
-/*
-══════════════════════════════════════════════════════════════════
-graph.js  →  resources/static/js/graph.js
-══════════════════════════════════════════════════════════════════
-Los enlaces clásicos se dibujan como <line> rectas.
-Los enlaces cuánticos se dibujan como <path> curvados, de forma
-que cuando ambos tipos conectan los mismos dos nodos sean
-visualmente distinguibles y clickables por separado.
-
-D3 grafoa kudeatzen du: indarren, nodoen eta loturen simulazioa.
-Kanpoaldearekin kallbacken bidez bakarrik komunikatzen da.
-
-Lotura klasikoak zuzen gisa marrazten dira. <line>
-Lotura kuantikoak kurba<path> marrazten dira, bi mota horiek bi 
-nodo berberak konektatzen dituztenean bisualki bereizteko eta 
-bereizita klikatzeko modukoak izan daitezen. 
-══════════════════════════════════════════════════════════════════
-*/
+// ══════════════════════════════════════════════════════════════
+// graph.js
+// ──────────────────────────────────────────────────────────────
+// D3.js erabiliz grafoa marraztu eta kudeatu
+// Lotura klasikoak lerroak dira, kuantikoak kurbak
+// ══════════════════════════════════════════════════════════════
 
 import { drawNodeIcon } from '/js/nodeIcon.js';
 
-const NODE_RADIUS = 32;
+const NODE_RADIUS = 32;  // Nodo bakoitzaren erradioa pixeletan
 
-// Lotura kuantikoen kurbatura: balio handiagoa → arku handiagoa.
-// 40-80 bitarteko balioa nahikoa da ikusteko, baina ez da gehiegizkoa. 
+// Lotura kuantikoen kurba (zenbat handiagoa, kurba nabarmenagoa)
 const CURVE = 55;
 
-let simulation = null;
+let simulation = null;  // D3-ren simulazioa global gorde (pause/restart-erako)
 
 
 /**
@@ -41,26 +28,35 @@ export function renderGraph(data, onNodeClick, onLinkClick, onBackgroundClick) {
   const { visibleNodes, classicalLinks, quantumLinks } = data;
 
   const svg = d3.select('#graph-svg');
-  svg.selectAll('*').remove();
+  svg.selectAll('*').remove(); // SVG osoa garbitu (aurreko grafoa kendu)
 
+  // SVG-ren tamaina lortu
   const W = svg.node().clientWidth  || 800;
   const H = svg.node().clientHeight || 600;
 
+  // Talde nagusia - lotura eta nodo guztiak hemen sartuko dira
   const g = svg.append('g').attr('class', 'zoom-g');
 
+  // Balidatu loturak: bi nodoak existitzen direla ziurtatu
   const nodeById      = Object.fromEntries(visibleNodes.map(n => [n.id, n]));
   const validClassical = classicalLinks.filter(l => nodeById[l.source] && nodeById[l.target]);
   const validQuantum   = quantumLinks.filter(l => nodeById[l.source] && nodeById[l.target]);
   const allValidLinks  = [...validClassical, ...validQuantum];
 
+  // ── SIMULAZIOA SORTU ─────────────────────────────────────────
+  // D3-k fisika simulazio bat sortzen du nodoak posizionatzeko
   simulation = _createSimulation(visibleNodes, allValidLinks, W, H);
 
-  // Klasikoak lehenik (azpian geratzen dira), kuantikoak gainetik
+  // ── LOTURAK MARRAZTU ─────────────────────────────────────────
+  // Lehenengo klasikoak (azpian), gero kuantikoak (gainean)
   const classicalSel = _drawClassicalLinks(g, validClassical, onLinkClick);
   const quantumSel   = _drawQuantumLinks(g, validQuantum, onLinkClick);
 
+  // ── NODOAK MARRAZTU ──────────────────────────────────────────
   const nodeSel = _drawNodes(g, visibleNodes, onNodeClick);
 
+  // ── SIMULAZIO TICK ───────────────────────────────────────────
+  // Tick bakoitzean (frame bakoitzean ~60 FPS), posizioak eguneratu
   simulation.on('tick', () => {
     // Lotura klasikoak: x1/y1/x2/y2 atributuak eguneratzen dira zuzenean
     classicalSel
@@ -70,14 +66,18 @@ export function renderGraph(data, onNodeClick, onLinkClick, onBackgroundClick) {
     // Lotura kuantikoak: tick bakoitzeko arku berria kalkulatzen da.
     quantumSel.attr('d', d => _arcPath(d.source, d.target, CURVE));
 
+    // Nodoak: transform="translate(x, y)" erabiliz mugitu
     nodeSel.attr('transform', d => `translate(${d.x}, ${d.y})`);
   });
 
+  // ── ATZEKO PLANOA KLIK ───────────────────────────────────────
+  // SVG-ko edozein leku hutsean klik egiten bada, deselekzionatu dena
   svg.on('click', () => {
     _clearSelection(classicalSel, quantumSel, nodeSel);
     onBackgroundClick();
   });
 
+  // Kanpora bi funtzio esportatu: nodo/lotura bat nabarmentzeko
   return {
     highlightNode: (id) => _selectNode(id, nodeSel, classicalSel, quantumSel),
     highlightLink: (id) => _selectLink(id, classicalSel, quantumSel, nodeSel),
@@ -86,6 +86,15 @@ export function renderGraph(data, onNodeClick, onLinkClick, onBackgroundClick) {
 
 
 /* ── Funtzio pribatuak ─────────────────────────────────────── */
+/**
+ * D3 indar-simulazioa sortu.
+ * 
+ * 4 indar aplikatzen dira:
+ * 1. forceLink: loturek nodoak hurbiltzen dituzte (distantzia = 170px)
+ * 2. forceManyBody: nodo guztiek elkar uxatzen dute (magnete negatiboak bezala)
+ * 3. forceCenter: nodoak zentrorantz erakartzen ditu
+ * 4. forceCollide: nodoak ez dira gainjarri (erradio minimo bat mantentzen)
+ */
 
 function _createSimulation(nodes, links, W, H) {
   return d3.forceSimulation(nodes)
@@ -117,12 +126,17 @@ function _drawQuantumLinks(g, links, onLinkClick) {
 
 /**
  * Bi punturen arteko kurba kuadratiko baten "d" atributua kalkulatzen du.
- * Kontrol puntua source eta target-en erdian dago, baina offset distantzia duzuen paraleloan desplazatuta, kurbatura sortuz.
- *
+ * SVG-ko 'Q' komandoa erabiltzen du:
+ *   M x1,y1  → Hasiera puntuan mugitu
+ *   Q cx,cy x2,y2  → Kurba kuadratikoa kontrol-puntu batekin
+ * 
+ * Kontrol-puntua (cx,cy) perpendikularki kokatzen da source-target
+ * lerroaren erdigunean, 'offset' distantziara.
  * 
  * @param {{x,y}} source  - Jatorriko nodoa
  * @param {{x,y}} target  - Helmuga nodoa
  * @param {number} offset - Kontrol-puntutik lerro zuzenera dagoen distantzia 
+ * @returns {String} SVG path string-a
  */
 function _arcPath(source, target, offset) {
   const dx = target.x - source.x;

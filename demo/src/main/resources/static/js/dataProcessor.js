@@ -3,9 +3,6 @@
 dataProcessor.js
 ──────────────────────────────────────────────────────────────────
 Funtzio bakarra du: processData(raw). Datuak D3rako prestatzen ditu, JSON fitxategitik. Bakarrik behar den formatua lortu.
-
-
-
 Exportatutako funtzioa: processData(raw) → { visibleNodes, classicalLinks, quantumLinks, kmsBySite }
 ══════════════════════════════════════════════════════════════════
 */
@@ -32,6 +29,7 @@ export function processData(raw) {
 
   // ── KMS → Site QN ───────────────────────────────────
   // Lotura kuantikoak KMSetara apuntatzen dute, baina hauek ez direnez marrazten nodora bideratu behar dugu
+  // Objektu bat sortzen dugu: { "KMS_D": "Site_D", "KMS_E1": "Site_E", ... }
   const kmsToSite = {};
   raw.nodes
     .filter(n => n.node_type === 'KMS')
@@ -41,6 +39,7 @@ export function processData(raw) {
 
   // ── KMSak nodoka bateratuta ──────────────────────────────────
   // Informazio panela erabiltzen da QN nodo bat aukeratzean, barruko KMSak erakusteko.
+  // Objektu bat: { "Site_E": [KMS_E1, KMS_E2], "Site_D": [KMS_D], ... }
   const kmsBySite = {};
   raw.nodes
     .filter(n => n.node_type === 'KMS')

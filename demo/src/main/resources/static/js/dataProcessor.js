@@ -68,7 +68,7 @@ export function processData(raw) {
       link_type: 'quantum',
       kms_source: l.source,
       kms_target: l.target
-    }));
+    })).filter(l => l.source !== l.target); 
 
   return { visibleNodes, classicalLinks, quantumLinks, kmsBySite };
 }

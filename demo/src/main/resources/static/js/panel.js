@@ -81,7 +81,7 @@ export function showLinkPanel(link) {
       Lotura ${isQuantum ? i18n.link.quantum : i18n.link.classical}
     </span>
     <div class="info-title">${srcId} ↔ ${tgtId}</div>
-    <div class="section-label">Ezaugarriak</div>
+    <div class="section-label">${i18n.sections.features}</div>
     <table class="info-table">
       <tr><td>${i18n.link.source}</td><td>${srcId}</td></tr>
 <tr><td>${i18n.link.target}</td><td>${tgtId}</td></tr>

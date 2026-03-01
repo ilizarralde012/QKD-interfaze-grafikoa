@@ -8,7 +8,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.support.ResourceBundleMessageSource;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 import org.thymeleaf.spring6.templateresolver.SpringResourceTemplateResolver;
-import org.thymeleaf.spring6.view.ThymeleafViewResolver;
 import org.thymeleaf.templatemode.TemplateMode;
 
 @SpringBootApplication
@@ -63,13 +62,13 @@ public class DemoApplication implements org.springframework.context.ApplicationC
         resourceBundleMessageSource.setBasename("messages");
         return resourceBundleMessageSource;
     }
-    @Bean
+    /*@Bean
     public ThymeleafViewResolver thymeleafViewResolver(){
         ThymeleafViewResolver viewResolver = new ThymeleafViewResolver();
         viewResolver.setContentType("text/html;encoding=utf-8");
         viewResolver.setTemplateEngine(templateEngine());
-        viewResolver.setViewNames(new String[] {"index","*th"});
+        viewResolver.setViewNames(new String[] {"*"});  // Orri guztiak onartu
         viewResolver.setOrder(Integer.valueOf(1));
         return viewResolver;
-    }
+    }*/
 }

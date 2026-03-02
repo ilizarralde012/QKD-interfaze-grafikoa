@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="eu" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sesio eskaerak - Network Topology</title>
+
+  <!-- Google-ko letrak -->
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+
+  <!-- ── GOIKO BARRA ── -->
+  <header class="topbar">
+    <span class="logo" th:text="#{requests.title}">Sesio eskaerak</span>
+    <div class="topbar-sep"></div>
+    
+    <!-- Hizkuntza hautatzailea -->
+    <div class="lang-selector">
+      <button class="lang-btn" id="lang-btn">
+        <span id="lang-code" th:text="#{nav.lang}">EU</span>
+      </button>
+      <div class="lang-dropdown" id="lang-dropdown">
+        <div class="lang-option" data-lang="eu">
+          <span>Euskera</span>
+        </div>
+        <div class="lang-option" data-lang="en">
+          <span>English</span>
+        </div>
+      </div>
+    </div>
+    
+    <a href="/" class="nav-btn" th:text="#{nav.topology}">Sare Topologia</a>
+    <a href="/apps" class="nav-btn" th:text="#{nav.apps}">Aplikazioak</a>
+  </header>
+
+  <!-- Taula -->
+  <main class="apps-main">
+    <h1 th:text="#{requests.title}">Sesio eskaerak</h1>
+
+    <!-- Taularen edukiontzia -->
+    <div class="table-container">
+
+      <!-- Izenburu eta kontagailu goiburua -->
+      <div class="table-header">
+        <h2 th:text="#{requests.list}">Zerrenda</h2>
+        <div class="app-count">
+          <span id="session-count-number">—</span>
+          <span th:text="#{requests.count.suffix}">eskaera</span>
+        </div>
+      </div>
+
+      <!-- Taula -->
+      <table class="apps-table">
+        <thead>
+          <tr>
+            <th th:text="#{requests.table.sessionId}">Sesio IDa</th>
+            <th th:text="#{requests.table.sourceApp}">Jatorrizko APP</th>
+            <th th:text="#{requests.table.destApp}">Helmugako APP</th>
+            <th th:text="#{requests.table.securityLevel}">Segurtasun maila</th>
+            <th th:text="#{requests.table.startTime}">Hasiera ordua</th>
+            <th th:text="#{requests.table.status}">Egoera</th>
+            <th th:text="#{requests.table.endTime}">Amaiera ordua</th>
+          </tr>
+        </thead>
+        <tbody id="sessions-table-body">
+          <tr class="loading-row">
+            <td colspan="7" th:text="#{requests.loading}">Datuak kargatzen...</td>
+          </tr>
+        </tbody>
+      </table>
+
+    </div>
+
+  </main>
+
+<script>
+  // Hizkuntza hautatzailearen logika
+  const langBtn = document.getElementById('lang-btn');
+  const langDropdown = document.getElementById('lang-dropdown');
+  const langCode = document.getElementById('lang-code');
+
+  langBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    langDropdown.classList.toggle('active');
+  });
+
+  document.querySelectorAll('.lang-option').forEach(option => {
+    option.addEventListener('click', () => {
+      const lang = option.dataset.lang;
+      window.location.href = '/requests?lang=' + lang;
+    });
+  });
+
+  document.addEventListener('click', () => {
+    langDropdown.classList.remove('active');
+  });
+
+  const activeLang = langCode.textContent.toLowerCase();
+  document.querySelectorAll('.lang-option').forEach(opt => {
+    opt.classList.toggle('selected', opt.dataset.lang === activeLang);
+  });
+</script>
+
+<script th:inline="javascript">
+  window.requestsI18n = {
+    empty: /*[[#{requests.empty}]]*/ "Ez dago sesio eskaerarik",
+    error: /*[[#{requests.error}]]*/ "Errorea datuak kargatzean"
+  };
+</script>
+
+<script>
+  // Orrialdea kargatzean, datuak eskatu
+  window.addEventListener('load', () => {
+    loadSessions();
+  });
+
+  function loadSessions() {
+    fetch('/api/sessions')
+      .then(response => {
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        return response.json();
+      })
+      .then(sessions => {
+        renderSessionsTable(sessions);
+        updateSessionCount(sessions.length);
+      })
+      .catch(error => {
+        console.error('Errorea sesioak kargatzean:', error);
+        showError();
+      });
+  }
+
+  function renderSessionsTable(sessions) {
+    const tbody = document.getElementById('sessions-table-body');
+    tbody.innerHTML = '';
+
+    if (sessions.length === 0) {
+      tbody.innerHTML = `
+        <tr class="loading-row">
+          <td colspan="7">${window.requestsI18n.empty}</td>
+        </tr>
+      `;
+      return;
+    }
+
+    sessions.forEach(session => {
+      const row = document.createElement('tr');
+      row.style.cursor = 'pointer';
+      
+      // Format dates
+      const startTime = session.startTime ? new Date(session.startTime).toLocaleString() : '—';
+      const endTime = session.endTime ? new Date(session.endTime).toLocaleString() : '—';
+
+      row.innerHTML = `
+        <td>${session.sessionId}</td>
+        <td>${session.sourceAppId || '—'}</td>
+        <td>${session.destAppId || '—'}</td>
+        <td>L${session.securityLevel || '—'}</td>
+        <td>${startTime}</td>
+        <td>${session.status || '—'}</td>
+        <td>${endTime}</td>
+      `;
+
+      // Klik event-a gehitu
+      row.addEventListener('click', () => {
+        loadSessionDetail(session.sessionId);
+      });
+
+      tbody.appendChild(row);
+    });
+  }
+
+  function updateSessionCount(count) {
+    document.getElementById('session-count-number').textContent = count;
+  }
+
+  function showError() {
+    const tbody = document.getElementById('sessions-table-body');
+    tbody.innerHTML = `
+      <tr class="loading-row">
+        <td colspan="7">${window.requestsI18n.error}</td>
+      </tr>
+    `;
+  }
+
+  function loadSessionDetail(sessionId) {
+    // Oraingoz kontsolan idatzi bakarrik
+    console.log('Session klikatua:', sessionId);
+    
+    // Hurrengo pausoan panel-a erakutsiko dugu
+    fetch(`/api/sessions/${sessionId}`)
+      .then(response => response.json())
+      .then(detail => {
+        console.log('Sesio xehetasunak:', detail);
+        // TODO: Panel-a erakutsi
+      })
+      .catch(error => {
+        console.error('Errorea xehetasunak kargatzean:', error);
+      });
+  }
+</script>
+
+</body>
+</html>

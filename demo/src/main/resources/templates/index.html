@@ -25,7 +25,7 @@
     <div class="topbar-sep"></div>
     <div class="lang-selector">
     <button class="lang-btn" id="lang-btn">
-      <span id="lang-code">EU</span>
+      <span id="lang-code" th:text="#{nav.lang}">EU</span>
     </button>
     <div class="lang-dropdown" id="lang-dropdown">
       <div class="lang-option" data-lang="eu">
@@ -150,14 +150,10 @@
     langDropdown.classList.remove('active');
   });
 
-  // Hizkuntza aktiboa ikusi eta botoia eguneratu
-  const urlParams = new URLSearchParams(window.location.search);
-  const currentLang = urlParams.get('lang') || 'eu';
-  langCode.textContent = currentLang.toUpperCase();
-  
-  // Dropdown-eko hautaketa markatu
+  // Dropdown-eko hautaketa markatu (langCode-tik irakurri hizkuntza aktiboa)
+  const activeLang = langCode.textContent.toLowerCase();
   document.querySelectorAll('.lang-option').forEach(opt => {
-    opt.classList.toggle('selected', opt.dataset.lang === currentLang);
+    opt.classList.toggle('selected', opt.dataset.lang === activeLang);
   });
 </script>
 <script th:inline="javascript">

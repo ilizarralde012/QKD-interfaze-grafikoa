@@ -609,3 +609,46 @@ body {
   color: var(--cn-color);
   font-weight: 600;
 }
+/* ══════════════════════════════════════════════════════════════
+   REQUESTS ORRIA
+   ══════════════════════════════════════════════════════════════ */
+
+.requests-layout {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.requests-main {
+  flex: 1;
+  overflow-y: auto;
+  padding: 32px 48px;
+}
+
+.close-btn {
+  padding: 4px 12px;
+  border-radius: 5px;
+  border: 1px solid var(--border);
+  background: white;
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.close-btn:hover {
+  background: var(--bg);
+}
+
+/* Sesio errenkadak klikatzeko */
+.session-row {
+  cursor: pointer;
+}
+.session-row:hover {
+  background: var(--cn-bg) !important;
+}
+.session-row.selected {
+  background: var(--cn-bg);
+  border-left: 3px solid var(--cn-color);
+}

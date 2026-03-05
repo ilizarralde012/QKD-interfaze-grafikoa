@@ -38,14 +38,14 @@
     <a href="/apps" class="nav-btn" th:text="#{nav.apps}">Aplikazioak</a>
   </header>
 
-  <!-- Taula -->
-  <main class="apps-main">
+  <!-- Layout nagusia: taula + panel -->
+<main class="requests-layout">
+  
+  <!-- Ezkerreko zatia: Taula -->
+  <div class="requests-main">
     <h1 th:text="#{requests.title}">Sesio eskaerak</h1>
 
-    <!-- Taularen edukiontzia -->
     <div class="table-container">
-
-      <!-- Izenburu eta kontagailu goiburua -->
       <div class="table-header">
         <h2 th:text="#{requests.list}">Zerrenda</h2>
         <div class="app-count">
@@ -54,7 +54,6 @@
         </div>
       </div>
 
-      <!-- Taula -->
       <table class="apps-table">
         <thead>
           <tr>
@@ -73,10 +72,24 @@
           </tr>
         </tbody>
       </table>
+    </div>
+  </div>
 
+  <!-- Eskuineko panela: Xehetasunak -->
+  <aside class="side-panel" id="session-panel" style="display: none;">
+    <div class="panel-header">
+      <div class="panel-dot" id="panel-dot"></div>
+      <span th:text="#{requests.detail.title}">Sesioaren xehetasunak</span>
+      <div style="flex: 1;"></div>
+      <button class="close-btn" id="close-panel-btn" th:text="#{requests.detail.close}">Itxi</button>
     </div>
 
-  </main>
+    <div class="panel-body" id="session-detail-body">
+      <!-- Xehetasunak hemen agertuko dira -->
+    </div>
+  </aside>
+
+</main>
 
 <script>
   // Hizkuntza hautatzailearen logika
@@ -188,21 +201,91 @@
     `;
   }
 
-  function loadSessionDetail(sessionId) {
-    // Oraingoz kontsolan idatzi bakarrik
-    console.log('Session klikatua:', sessionId);
-    
-    // Hurrengo pausoan panel-a erakutsiko dugu
+ function loadSessionDetail(sessionId) {
     fetch(`/api/sessions/${sessionId}`)
       .then(response => response.json())
       .then(detail => {
-        console.log('Sesio xehetasunak:', detail);
-        // TODO: Panel-a erakutsi
+        showSessionPanel(detail);
       })
       .catch(error => {
         console.error('Errorea xehetasunak kargatzean:', error);
       });
   }
+
+  function showSessionPanel(detail) {
+    const panel = document.getElementById('session-panel');
+    const panelBody = document.getElementById('session-detail-body');
+    const panelDot = document.getElementById('panel-dot');
+
+    // Panel-a erakutsi
+    panel.style.display = 'flex';
+    panelDot.style.background = '#7c3aed';
+
+    // Edukia sortu
+    let html = `
+      <div class="info-title">${detail.sessionId}</div>
+      <div class="section-label">Security Level: L${detail.securityLevel}</div>
+      <div class="section-label">Status: ${detail.status}</div>
+    `;
+
+    // Xehetasunak gehitu status-en arabera
+    if (detail.status === 'Level configured for init' || 
+        detail.status === 'SLA assigned for target' || 
+        detail.status === 'Level configured for target') {
+      
+      html += '<div class="section-label" style="margin-top: 20px;">Details</div>';
+      
+      // L1
+      if (detail.securityLevel === 1 && detail.kmsSrcId) {
+        html += `
+          <table class="info-table">
+            <tr><td>Source KMS</td><td>${detail.kmsSrcId}</td></tr>
+            <tr><td>Dest KMS</td><td>${detail.kmsDstId}</td></tr>
+          </table>
+        `;
+      }
+      
+      // L2
+      if (detail.securityLevel === 2 && detail.l2Hops) {
+        html += '<div style="margin-top: 10px;"><strong>Relay Path:</strong></div>';
+        detail.l2Hops.forEach(hop => {
+          html += `
+            <div class="kms-card">
+              <div class="kms-id">Hop ${hop.hopOrder}: ${hop.kmsId}</div>
+            </div>
+          `;
+        });
+      }
+      
+      // L3
+      if (detail.securityLevel === 3 && detail.receiverId) {
+        html += `
+          <table class="info-table">
+            <tr><td>Receiver</td><td>${detail.receiverId}</td></tr>
+            <tr><td>Passive</td><td>${detail.passiveId}</td></tr>
+            <tr><td>Relay</td><td>${detail.relayId}</td></tr>
+          </table>
+        `;
+      }
+      
+      // L4
+      if (detail.securityLevel === 4 && detail.initiatorId) {
+        html += `
+          <table class="info-table">
+            <tr><td>Initiator</td><td>${detail.initiatorId}</td></tr>
+            <tr><td>Responder</td><td>${detail.responderId}</td></tr>
+          </table>
+        `;
+      }
+    }
+
+    panelBody.innerHTML = html;
+  }
+
+  // Itxi botoia
+  document.getElementById('close-panel-btn').addEventListener('click', () => {
+    document.getElementById('session-panel').style.display = 'none';
+  });
 </script>
 
 </body>

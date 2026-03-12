@@ -9,6 +9,7 @@ import com.example.demo.dto.SessionDetailDTO;
 import com.example.demo.dto.SessionSummaryDTO;
 import com.example.demo.entity_DL.SessionE;
 import com.example.demo.entity_DL.SessionL2DetailsE;
+import com.example.demo.exception.SessionNotFoundException;
 import com.example.demo.repository_DL.SessionL1DetailsRepository;
 import com.example.demo.repository_DL.SessionL2DetailsRepository;
 import com.example.demo.repository_DL.SessionL3DetailsRepository;
@@ -67,7 +68,7 @@ public class SessionService {
     // Sesio baten xehetasunak lortu (panelerantzat)
     public SessionDetailDTO getSessionDetail(String sessionId) {
         SessionE session = sessionRepository.findById(sessionId)
-            .orElseThrow(() -> new RuntimeException("Session not found: " + sessionId));
+            .orElseThrow(() -> new SessionNotFoundException(sessionId));
 
         SessionDetailDTO detail = new SessionDetailDTO();
         detail.setSessionId(session.getId());

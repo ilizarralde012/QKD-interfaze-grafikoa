@@ -44,26 +44,25 @@ public class SessionService {
 
     // Sesio guztien laburpena lortu (taularentzat)
     public List<SessionSummaryDTO> getAllSessions() {
-        List<SessionE> sessions = sessionRepository.findAll();
+    List<SessionE> sessions = sessionRepository.findAllWithRelations();  
+    
+    return sessions.stream().map(session -> {
+        String sourceAppId = session.getInitApp() != null ? session.getInitApp().getId() : null;
+        String destAppId = session.getTargetApp() != null ? session.getTargetApp().getId() : null;
         
-        return sessions.stream().map(session -> {
-            String sourceAppId = session.getInitApp() != null ? session.getInitApp().getId() : null;
-            String destAppId = session.getTargetApp() != null ? session.getTargetApp().getId() : null;
-            
-            // endTime: bakarrik "Level configured for target" bada
-            boolean showEndTime = "Level configured for target".equals(session.getStatus());
-            
-            return new SessionSummaryDTO(
-                session.getId(),
-                sourceAppId,
-                destAppId,
-                session.getSecurityLevel() != null ? session.getSecurityLevel().getId() : null,
-                session.getStartTime(),
-                session.getStatus(),
-                showEndTime ? session.getEndTime() : null
-            );
-        }).collect(Collectors.toList());
-    }
+        boolean showEndTime = "Level configured for target".equals(session.getStatus());
+        
+        return new SessionSummaryDTO(
+            session.getId(),
+            sourceAppId,
+            destAppId,
+            session.getSecurityLevel() != null ? session.getSecurityLevel().getId() : null,
+            session.getStartTime(),
+            session.getStatus(),
+            showEndTime ? session.getEndTime() : null
+        );
+    }).collect(Collectors.toList());
+}
 
     // Sesio baten xehetasunak lortu (panelerantzat)
     public SessionDetailDTO getSessionDetail(String sessionId) {

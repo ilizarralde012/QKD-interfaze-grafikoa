@@ -7,7 +7,9 @@
   <title>Sesio eskaerak - Network Topology</title>
 
   <!-- Google-ko letrak -->
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
 
   <link rel="stylesheet" href="/css/style.css">
 </head>
@@ -18,7 +20,7 @@
   <header class="topbar">
     <span class="logo" th:text="#{requests.title}">Sesio eskaerak</span>
     <div class="topbar-sep"></div>
-    
+
     <!-- Hizkuntza hautatzailea -->
     <div class="lang-selector">
       <button class="lang-btn" id="lang-btn">
@@ -33,165 +35,142 @@
         </div>
       </div>
     </div>
-    
+
     <a href="/" class="nav-btn" th:text="#{nav.topology}">Sare Topologia</a>
     <a href="/apps" class="nav-btn" th:text="#{nav.apps}">Aplikazioak</a>
   </header>
 
   <!-- Layout nagusia: taula + panel -->
-<main class="requests-layout">
-  
-  <!-- Ezkerreko zatia: Taula -->
-  <div class="requests-main">
-    <h1 th:text="#{requests.title}">Sesio eskaerak</h1>
+  <main class="requests-layout">
 
-    <div class="table-container">
-      <div class="table-header">
-        <h2 th:text="#{requests.list}">Zerrenda</h2>
-        <div class="app-count">
-          <span id="session-count-number">—</span>
-          <span th:text="#{requests.count.suffix}">eskaera</span>
+    <!-- Ezkerreko zatia: Taula -->
+    <div class="requests-main">
+      <h1 th:text="#{requests.title}">Sesio eskaerak</h1>
+
+      <div class="table-container">
+        <div class="table-header">
+          <h2 th:text="#{requests.list}">Zerrenda</h2>
+          <div class="app-count">
+            <span id="session-count-number">—</span>
+            <span th:text="#{requests.count.suffix}">eskaera</span>
+          </div>
         </div>
+
+        <table class="apps-table">
+          <thead>
+            <tr>
+              <th th:text="#{requests.table.sessionId}">Sesio IDa</th>
+              <th th:text="#{requests.table.sourceApp}">Jatorrizko APP</th>
+              <th th:text="#{requests.table.destApp}">Helmugako APP</th>
+              <th th:text="#{requests.table.securityLevel}">Segurtasun maila</th>
+              <th th:text="#{requests.table.startTime}">Hasiera ordua</th>
+              <th th:text="#{requests.table.status}">Egoera</th>
+              <th th:text="#{requests.table.endTime}">Amaiera ordua</th>
+            </tr>
+          </thead>
+          <tbody id="sessions-table-body">
+            <tr class="loading-row">
+              <td colspan="7" th:text="#{requests.loading}">Datuak kargatzen...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Eskuineko panela: Xehetasunak -->
+    <aside class="side-panel" id="session-panel" style="display: none;">
+      <div class="panel-header">
+        <div class="panel-dot" id="panel-dot"></div>
+        <span th:text="#{requests.detail.title}">Sesioaren xehetasunak</span>
+        <div style="flex: 1;"></div>
+        <button class="close-btn" id="close-panel-btn" th:text="#{requests.detail.close}">Itxi</button>
       </div>
 
-      <table class="apps-table">
-        <thead>
-          <tr>
-            <th th:text="#{requests.table.sessionId}">Sesio IDa</th>
-            <th th:text="#{requests.table.sourceApp}">Jatorrizko APP</th>
-            <th th:text="#{requests.table.destApp}">Helmugako APP</th>
-            <th th:text="#{requests.table.securityLevel}">Segurtasun maila</th>
-            <th th:text="#{requests.table.startTime}">Hasiera ordua</th>
-            <th th:text="#{requests.table.status}">Egoera</th>
-            <th th:text="#{requests.table.endTime}">Amaiera ordua</th>
-          </tr>
-        </thead>
-        <tbody id="sessions-table-body">
-          <tr class="loading-row">
-            <td colspan="7" th:text="#{requests.loading}">Datuak kargatzen...</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
+      <div class="panel-body" id="session-detail-body">
+        <!-- Xehetasunak hemen agertuko dira -->
+      </div>
+    </aside>
 
-  <!-- Eskuineko panela: Xehetasunak -->
-  <aside class="side-panel" id="session-panel" style="display: none;">
-    <div class="panel-header">
-      <div class="panel-dot" id="panel-dot"></div>
-      <span th:text="#{requests.detail.title}">Sesioaren xehetasunak</span>
-      <div style="flex: 1;"></div>
-      <button class="close-btn" id="close-panel-btn" th:text="#{requests.detail.close}">Itxi</button>
-    </div>
+  </main>
 
-    <div class="panel-body" id="session-detail-body">
-      <!-- Xehetasunak hemen agertuko dira -->
-    </div>
-  </aside>
+  <script type="module">
+  import { initLanguageSelector } from '/js/languageSelector.js';
+  initLanguageSelector('requests');
+</script>
 
-</main>
+  <script th:inline="javascript">
+    window.requestsI18n = {
+      empty: /*[[#{requests.empty}]]*/ "Ez dago sesio eskaerarik",
+      error: /*[[#{requests.error}]]*/ "Errorea datuak kargatzean",
 
-<script>
-  // Hizkuntza hautatzailearen logika
-  const langBtn = document.getElementById('lang-btn');
-  const langDropdown = document.getElementById('lang-dropdown');
-  const langCode = document.getElementById('lang-code');
+      // Detail panel labels
+      securityLevel: /*[[#{requests.detail.securityLevel}]]*/ "Segurtasun maila",
+      status: /*[[#{requests.detail.status}]]*/ "Egoera",
+      details: /*[[#{requests.detail.title}]]*/ "Xehetasunak",
 
-  langBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    langDropdown.classList.toggle('active');
-  });
+      // L1
+      l1KmsSrc: /*[[#{requests.detail.l1.kmsSrc}]]*/ "Jatorrizko KMS",
+      l1KmsDst: /*[[#{requests.detail.l1.kmsDst}]]*/ "Helmugako KMS",
 
-  document.querySelectorAll('.lang-option').forEach(option => {
-    option.addEventListener('click', () => {
-      const lang = option.dataset.lang;
-      window.location.href = '/requests?lang=' + lang;
+      // L2
+      l2RelayPath: /*[[#{requests.detail.l2.relayPath}]]*/ "Relay bidea",
+      l2Hop: /*[[#{requests.detail.l2.hop}]]*/ "Jauzia",
+
+      // L3
+      l3Receiver: /*[[#{requests.detail.l3.receiver}]]*/ "Receiver",
+      l3Passive: /*[[#{requests.detail.l3.passive}]]*/ "Passive",
+      l3Relay: /*[[#{requests.detail.l3.relay}]]*/ "Relay",
+
+      // L4
+      l4Initiator: /*[[#{requests.detail.l4.initiator}]]*/ "Initiator",
+      l4Responder: /*[[#{requests.detail.l4.responder}]]*/ "Responder"
+    };
+  </script>
+
+  <script>
+    // Orrialdea kargatzean, datuak eskatu
+    window.addEventListener('load', () => {
+      loadSessions();
     });
-  });
 
-  document.addEventListener('click', () => {
-    langDropdown.classList.remove('active');
-  });
+    function loadSessions() {
+      fetch('/api/sessions')
+        .then(response => {
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          return response.json();
+        })
+        .then(sessions => {
+          renderSessionsTable(sessions);
+          updateSessionCount(sessions.length);
+        })
+        .catch(error => {
+          console.error('Errorea sesioak kargatzean:', error);
+          showError();
+        });
+    }
 
-  const activeLang = langCode.textContent.toLowerCase();
-  document.querySelectorAll('.lang-option').forEach(opt => {
-    opt.classList.toggle('selected', opt.dataset.lang === activeLang);
-  });
-</script>
+    function renderSessionsTable(sessions) {
+      const tbody = document.getElementById('sessions-table-body');
+      tbody.innerHTML = '';
 
-<script th:inline="javascript">
-  window.requestsI18n = {
-    empty: /*[[#{requests.empty}]]*/ "Ez dago sesio eskaerarik",
-    error: /*[[#{requests.error}]]*/ "Errorea datuak kargatzean",
-    
-    // Detail panel labels
-    securityLevel: /*[[#{requests.detail.securityLevel}]]*/ "Segurtasun maila",
-    status: /*[[#{requests.detail.status}]]*/ "Egoera",
-    details: /*[[#{requests.detail.title}]]*/ "Xehetasunak",
-    
-    // L1
-    l1KmsSrc: /*[[#{requests.detail.l1.kmsSrc}]]*/ "Jatorrizko KMS",
-    l1KmsDst: /*[[#{requests.detail.l1.kmsDst}]]*/ "Helmugako KMS",
-    
-    // L2
-    l2RelayPath: /*[[#{requests.detail.l2.relayPath}]]*/ "Relay bidea",
-    l2Hop: /*[[#{requests.detail.l2.hop}]]*/ "Jauzia",
-    
-    // L3
-    l3Receiver: /*[[#{requests.detail.l3.receiver}]]*/ "Receiver",
-    l3Passive: /*[[#{requests.detail.l3.passive}]]*/ "Passive",
-    l3Relay: /*[[#{requests.detail.l3.relay}]]*/ "Relay",
-    
-    // L4
-    l4Initiator: /*[[#{requests.detail.l4.initiator}]]*/ "Initiator",
-    l4Responder: /*[[#{requests.detail.l4.responder}]]*/ "Responder"
-  };
-</script>
-
-<script>
-  // Orrialdea kargatzean, datuak eskatu
-  window.addEventListener('load', () => {
-    loadSessions();
-  });
-
-  function loadSessions() {
-    fetch('/api/sessions')
-      .then(response => {
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        return response.json();
-      })
-      .then(sessions => {
-        renderSessionsTable(sessions);
-        updateSessionCount(sessions.length);
-      })
-      .catch(error => {
-        console.error('Errorea sesioak kargatzean:', error);
-        showError();
-      });
-  }
-
-  function renderSessionsTable(sessions) {
-    const tbody = document.getElementById('sessions-table-body');
-    tbody.innerHTML = '';
-
-    if (sessions.length === 0) {
-      tbody.innerHTML = `
+      if (sessions.length === 0) {
+        tbody.innerHTML = `
         <tr class="loading-row">
           <td colspan="7">${window.requestsI18n.empty}</td>
         </tr>
       `;
-      return;
-    }
+        return;
+      }
 
-    sessions.forEach(session => {
-      const row = document.createElement('tr');
-      row.style.cursor = 'pointer';
-      
-      // Format dates
-      const startTime = session.startTime ? new Date(session.startTime).toLocaleString() : '—';
-      const endTime = session.endTime ? new Date(session.endTime).toLocaleString() : '—';
+      sessions.forEach(session => {
+        const row = document.createElement('tr');
+        row.style.cursor = 'pointer';
 
-      row.innerHTML = `
+        // Format dates
+        const startTime = session.startTime ? new Date(session.startTime).toLocaleString() : '—';
+        const endTime = session.endTime ? new Date(session.endTime).toLocaleString() : '—';
+
+        row.innerHTML = `
         <td>${session.sessionId}</td>
         <td>${session.sourceAppId || '—'}</td>
         <td>${session.destAppId || '—'}</td>
@@ -201,114 +180,115 @@
         <td>${endTime}</td>
       `;
 
-      // Klik event-a gehitu
-      row.addEventListener('click', () => {
-        loadSessionDetail(session.sessionId);
+        // Klik event-a gehitu
+        row.addEventListener('click', () => {
+          loadSessionDetail(session.sessionId);
+        });
+
+        tbody.appendChild(row);
       });
+    }
 
-      tbody.appendChild(row);
-    });
-  }
+    function updateSessionCount(count) {
+      document.getElementById('session-count-number').textContent = count;
+    }
 
-  function updateSessionCount(count) {
-    document.getElementById('session-count-number').textContent = count;
-  }
-
-  function showError() {
-    const tbody = document.getElementById('sessions-table-body');
-    tbody.innerHTML = `
+    function showError() {
+      const tbody = document.getElementById('sessions-table-body');
+      tbody.innerHTML = `
       <tr class="loading-row">
         <td colspan="7">${window.requestsI18n.error}</td>
       </tr>
     `;
-  }
+    }
 
- function loadSessionDetail(sessionId) {
-    fetch(`/api/sessions/${sessionId}`)
-      .then(response => response.json())
-      .then(detail => {
-        showSessionPanel(detail);
-      })
-      .catch(error => {
-        console.error('Errorea xehetasunak kargatzean:', error);
-      });
-  }
+    function loadSessionDetail(sessionId) {
+      fetch(`/api/sessions/${sessionId}`)
+        .then(response => response.json())
+        .then(detail => {
+          showSessionPanel(detail);
+        })
+        .catch(error => {
+          console.error('Errorea xehetasunak kargatzean:', error);
+        });
+    }
 
-  function showSessionPanel(detail) {
-    const panel = document.getElementById('session-panel');
-    const panelBody = document.getElementById('session-detail-body');
-    const panelDot = document.getElementById('panel-dot');
+    function showSessionPanel(detail) {
+      const panel = document.getElementById('session-panel');
+      const panelBody = document.getElementById('session-detail-body');
+      const panelDot = document.getElementById('panel-dot');
 
-    // Panel-a erakutsi
-    panel.style.display = 'flex';
-    panelDot.style.background = '#7c3aed';
+      // Panel-a erakutsi
+      panel.style.display = 'flex';
+      panelDot.style.background = '#7c3aed';
 
-    // Edukia sortu
-    let html = `
+      // Edukia sortu
+      let html = `
       <div class="info-title">${detail.sessionId}</div>
       <div class="section-label">${window.requestsI18n.securityLevel}: L${detail.securityLevel}</div>
       <div class="section-label">${window.requestsI18n.status}: ${detail.status}</div>
     `;
 
-    // Xehetasunak gehitu status-en arabera
-    if (detail.status === 'Level configured for init' || 
-        detail.status === 'SLA assigned for target' || 
+      // Xehetasunak gehitu status-en arabera
+      if (detail.status === 'Level configured for init' ||
+        detail.status === 'SLA assigned for target' ||
         detail.status === 'Level configured for target') {
-      
-      html += `<div class="section-label" style="margin-top: 20px;">${window.requestsI18n.details}</div>`;
-      
-      // L1
-      if (detail.securityLevel === 1 && detail.kmsSrcId) {
-        html += `
+
+        html += `<div class="section-label" style="margin-top: 20px;">${window.requestsI18n.details}</div>`;
+
+        // L1
+        if (detail.securityLevel === 1 && detail.kmsSrcId) {
+          html += `
           <table class="info-table">
             <tr><td>${window.requestsI18n.l1KmsSrc}</td><td>${detail.kmsSrcId}</td></tr>
             <tr><td>${window.requestsI18n.l1KmsDst}</td><td>${detail.kmsDstId}</td></tr>
           </table>
         `;
-      }
-      
-      // L2
-      if (detail.securityLevel === 2 && detail.l2Hops) {
-        html += `<div style="margin-top: 10px;"><strong>${window.requestsI18n.l2RelayPath}:</strong></div>`;
-        detail.l2Hops.forEach(hop => {
-          html += `
+        }
+
+        // L2
+        if (detail.securityLevel === 2 && detail.l2Hops) {
+          html += `<div style="margin-top: 10px;"><strong>${window.requestsI18n.l2RelayPath}:</strong></div>`;
+          detail.l2Hops.forEach(hop => {
+            html += `
             <div class="kms-card">
               <div class="kms-id">${window.requestsI18n.l2Hop} ${hop.hopOrder}: ${hop.kmsId}</div>
             </div>
           `;
-        });
-      }
-      
-      // L3
-      if (detail.securityLevel === 3 && detail.receiverId) {
-        html += `
+          });
+        }
+
+        // L3
+        if (detail.securityLevel === 3 && detail.receiverId) {
+          html += `
           <table class="info-table">
             <tr><td>${window.requestsI18n.l3Receiver}</td><td>${detail.receiverId}</td></tr>
             <tr><td>${window.requestsI18n.l3Passive}</td><td>${detail.passiveId}</td></tr>
             <tr><td>${window.requestsI18n.l3Relay}</td><td>${detail.relayId}</td></tr>
           </table>
         `;
-      }
-      
-      // L4
-      if (detail.securityLevel === 4 && detail.initiatorId) {
-        html += `
+        }
+
+        // L4
+        if (detail.securityLevel === 4 && detail.initiatorId) {
+          html += `
           <table class="info-table">
             <tr><td>${window.requestsI18n.l4Initiator}</td><td>${detail.initiatorId}</td></tr>
             <tr><td>${window.requestsI18n.l4Responder}</td><td>${detail.responderId}</td></tr>
           </table>
         `;
+        }
       }
+
+      panelBody.innerHTML = html;
     }
 
-    panelBody.innerHTML = html;
-  }
-
-  // Itxi botoia
-  document.getElementById('close-panel-btn').addEventListener('click', () => {
-    document.getElementById('session-panel').style.display = 'none';
-  });
-</script>
+    // Itxi botoia
+    document.getElementById('close-panel-btn').addEventListener('click', () => {
+      document.getElementById('session-panel').style.display = 'none';
+    });
+  </script>
 
 </body>
+
 </html>

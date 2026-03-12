@@ -74,44 +74,17 @@
     </div>
 
   </main>
-  <script>
-  // Hizkuntza hautatzailearen logika
-  const langBtn = document.getElementById('lang-btn');
-  const langDropdown = document.getElementById('lang-dropdown');
-  const langCode = document.getElementById('lang-code');
-
-  // Dropdown irekitzeko/ixteko
-  langBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    langDropdown.classList.toggle('active');
-  });
-
-  // Hizkuntza bat aukeratzean
-  document.querySelectorAll('.lang-option').forEach(option => {
-    option.addEventListener('click', () => {
-      const lang = option.dataset.lang;
-      window.location.href = '/apps?lang=' + lang;
-    });
-  });
-
-  // Kanpoan klik egitean dropdown itxi
-  document.addEventListener('click', () => {
-    langDropdown.classList.remove('active');
-  });
-
-  // Dropdown-eko hautaketa markatu (langCode-tik irakurri hizkuntza aktiboa)
-  const activeLang = langCode.textContent.toLowerCase();
-  document.querySelectorAll('.lang-option').forEach(opt => {
-    opt.classList.toggle('selected', opt.dataset.lang === activeLang);
-  });
+  <script type="module">
+  import { initLanguageSelector } from '/js/languageSelector.js';
+  initLanguageSelector('apps');
 </script>
 
-<script th:inline="javascript">
-  window.appsI18n = {
-    empty: /*[[#{apps.empty}]]*/ "Ez dago aplikaziorik erregistratuta",
-    error: /*[[#{apps.error}]]*/ "Errorea datuak kargatzean"
-  };
-</script>
+  <script th:inline="javascript">
+    window.appsI18n = {
+      empty: /*[[#{apps.empty}]]*/ "Ez dago aplikaziorik erregistratuta",
+      error: /*[[#{apps.error}]]*/ "Errorea datuak kargatzean"
+    };
+  </script>
 
   <script>
     // Orrialdea kargatzean, datuak eskatu
@@ -147,13 +120,13 @@
       tbody.innerHTML = '';
 
       if (apps.length === 0) {
-    tbody.innerHTML = `
+        tbody.innerHTML = `
       <tr class="loading-row">
         <td colspan="4">${window.appsI18n.empty}</td>
       </tr>
     `;
-    return;
-  }
+        return;
+      }
 
       // App bakoitzeko errenkada bat sortu
       apps.forEach(app => {

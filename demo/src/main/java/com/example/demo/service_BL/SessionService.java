@@ -9,6 +9,7 @@ import com.example.demo.dto.SessionDetailDTO;
 import com.example.demo.dto.SessionSummaryDTO;
 import com.example.demo.entity_DL.SessionE;
 import com.example.demo.entity_DL.SessionL2DetailsE;
+import com.example.demo.entity_DL.SessionStatus;
 import com.example.demo.exception.SessionNotFoundException;
 import com.example.demo.repository_DL.SessionL1DetailsRepository;
 import com.example.demo.repository_DL.SessionL2DetailsRepository;
@@ -50,7 +51,7 @@ public class SessionService {
         String sourceAppId = session.getInitApp() != null ? session.getInitApp().getId() : null;
         String destAppId = session.getTargetApp() != null ? session.getTargetApp().getId() : null;
         
-        boolean showEndTime = "Level configured for target".equals(session.getStatus());
+        boolean showEndTime = SessionStatus.shouldShowEndTime(session.getStatus());
         
         return new SessionSummaryDTO(
             session.getId(),
@@ -78,12 +79,9 @@ public class SessionService {
 
         // Xehetasunak kargatu status-en arabera
         String status = session.getStatus();
-        if ("Level configured for init".equals(status) || 
-            "SLA assigned for target".equals(status) || 
-            "Level configured for target".equals(status)) {
-            
-            loadDetailsByLevel(detail, sessionId, secLevel);
-        }
+        if (SessionStatus.shouldShowDetails(session.getStatus())) {
+        loadDetailsByLevel(detail, sessionId, secLevel);
+    }
 
         return detail;
     }

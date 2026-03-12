@@ -122,7 +122,29 @@
 <script th:inline="javascript">
   window.requestsI18n = {
     empty: /*[[#{requests.empty}]]*/ "Ez dago sesio eskaerarik",
-    error: /*[[#{requests.error}]]*/ "Errorea datuak kargatzean"
+    error: /*[[#{requests.error}]]*/ "Errorea datuak kargatzean",
+    
+    // Detail panel labels
+    securityLevel: /*[[#{requests.detail.securityLevel}]]*/ "Segurtasun maila",
+    status: /*[[#{requests.detail.status}]]*/ "Egoera",
+    details: /*[[#{requests.detail.title}]]*/ "Xehetasunak",
+    
+    // L1
+    l1KmsSrc: /*[[#{requests.detail.l1.kmsSrc}]]*/ "Jatorrizko KMS",
+    l1KmsDst: /*[[#{requests.detail.l1.kmsDst}]]*/ "Helmugako KMS",
+    
+    // L2
+    l2RelayPath: /*[[#{requests.detail.l2.relayPath}]]*/ "Relay bidea",
+    l2Hop: /*[[#{requests.detail.l2.hop}]]*/ "Jauzia",
+    
+    // L3
+    l3Receiver: /*[[#{requests.detail.l3.receiver}]]*/ "Receiver",
+    l3Passive: /*[[#{requests.detail.l3.passive}]]*/ "Passive",
+    l3Relay: /*[[#{requests.detail.l3.relay}]]*/ "Relay",
+    
+    // L4
+    l4Initiator: /*[[#{requests.detail.l4.initiator}]]*/ "Initiator",
+    l4Responder: /*[[#{requests.detail.l4.responder}]]*/ "Responder"
   };
 </script>
 
@@ -224,8 +246,8 @@
     // Edukia sortu
     let html = `
       <div class="info-title">${detail.sessionId}</div>
-      <div class="section-label">Security Level: L${detail.securityLevel}</div>
-      <div class="section-label">Status: ${detail.status}</div>
+      <div class="section-label">${window.requestsI18n.securityLevel}: L${detail.securityLevel}</div>
+      <div class="section-label">${window.requestsI18n.status}: ${detail.status}</div>
     `;
 
     // Xehetasunak gehitu status-en arabera
@@ -233,25 +255,25 @@
         detail.status === 'SLA assigned for target' || 
         detail.status === 'Level configured for target') {
       
-      html += '<div class="section-label" style="margin-top: 20px;">Details</div>';
+      html += `<div class="section-label" style="margin-top: 20px;">${window.requestsI18n.details}</div>`;
       
       // L1
       if (detail.securityLevel === 1 && detail.kmsSrcId) {
         html += `
           <table class="info-table">
-            <tr><td>Source KMS</td><td>${detail.kmsSrcId}</td></tr>
-            <tr><td>Dest KMS</td><td>${detail.kmsDstId}</td></tr>
+            <tr><td>${window.requestsI18n.l1KmsSrc}</td><td>${detail.kmsSrcId}</td></tr>
+            <tr><td>${window.requestsI18n.l1KmsDst}</td><td>${detail.kmsDstId}</td></tr>
           </table>
         `;
       }
       
       // L2
       if (detail.securityLevel === 2 && detail.l2Hops) {
-        html += '<div style="margin-top: 10px;"><strong>Relay Path:</strong></div>';
+        html += `<div style="margin-top: 10px;"><strong>${window.requestsI18n.l2RelayPath}:</strong></div>`;
         detail.l2Hops.forEach(hop => {
           html += `
             <div class="kms-card">
-              <div class="kms-id">Hop ${hop.hopOrder}: ${hop.kmsId}</div>
+              <div class="kms-id">${window.requestsI18n.l2Hop} ${hop.hopOrder}: ${hop.kmsId}</div>
             </div>
           `;
         });
@@ -261,9 +283,9 @@
       if (detail.securityLevel === 3 && detail.receiverId) {
         html += `
           <table class="info-table">
-            <tr><td>Receiver</td><td>${detail.receiverId}</td></tr>
-            <tr><td>Passive</td><td>${detail.passiveId}</td></tr>
-            <tr><td>Relay</td><td>${detail.relayId}</td></tr>
+            <tr><td>${window.requestsI18n.l3Receiver}</td><td>${detail.receiverId}</td></tr>
+            <tr><td>${window.requestsI18n.l3Passive}</td><td>${detail.passiveId}</td></tr>
+            <tr><td>${window.requestsI18n.l3Relay}</td><td>${detail.relayId}</td></tr>
           </table>
         `;
       }
@@ -272,8 +294,8 @@
       if (detail.securityLevel === 4 && detail.initiatorId) {
         html += `
           <table class="info-table">
-            <tr><td>Initiator</td><td>${detail.initiatorId}</td></tr>
-            <tr><td>Responder</td><td>${detail.responderId}</td></tr>
+            <tr><td>${window.requestsI18n.l4Initiator}</td><td>${detail.initiatorId}</td></tr>
+            <tr><td>${window.requestsI18n.l4Responder}</td><td>${detail.responderId}</td></tr>
           </table>
         `;
       }

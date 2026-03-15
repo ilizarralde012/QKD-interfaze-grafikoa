@@ -15,8 +15,8 @@ const panelBody = document.getElementById('panel-body');
  * QN bada, bere KMSak erakusten ditu.
  * Beti bilatzen du BDn sitearekin lotutako aplikazioak.
  *
- * @param {Object} node      - Datos del nodo seleccionado
- * @param {Object} kmsBySite - Mapa site → array de KMS
+ * @param {Object} node      - Hautatutako nodoaren datuak
+ * @param {Object} kmsBySite - Site bakoitzaren KMS array-a
  */
 export function showNodePanel(node, kmsBySite) {
   const isQN = node.node_type === 'QN';

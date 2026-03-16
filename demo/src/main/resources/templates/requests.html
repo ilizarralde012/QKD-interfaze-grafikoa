@@ -40,68 +40,50 @@
     <a href="/apps" class="nav-btn" th:text="#{nav.apps}">Aplikazioak</a>
   </header>
 
-  <!-- Layout nagusia: taula + panel -->
-  <main class="requests-layout">
+  <!-- Layout sinplea: taula bakarrik -->
+  <main class="requests-main-fullwidth">
+    <h1 th:text="#{requests.title}">Sesio eskaerak</h1>
 
-    <!-- Ezkerreko zatia: Taula -->
-    <div class="requests-main">
-      <h1 th:text="#{requests.title}">Sesio eskaerak</h1>
-
-      <div class="table-container">
-        <div class="table-header">
-          <h2 th:text="#{requests.list}">Zerrenda</h2>
-          <div class="app-count">
-            <span id="session-count-number">—</span>
-            <span th:text="#{requests.count.suffix}">eskaera</span>
-          </div>
+    <div class="table-container">
+      <div class="table-header">
+        <h2 th:text="#{requests.list}">Zerrenda</h2>
+        <div class="app-count">
+          <span id="session-count-number">—</span>
+          <span th:text="#{requests.count.suffix}">eskaera</span>
         </div>
-
-        <table class="apps-table">
-          <thead>
-            <tr>
-              <th th:text="#{requests.table.sessionId}">Sesio IDa</th>
-              <th th:text="#{requests.table.sourceApp}">Jatorrizko APP</th>
-              <th th:text="#{requests.table.destApp}">Helmugako APP</th>
-              <th th:text="#{requests.table.securityLevel}">Segurtasun maila</th>
-              <th th:text="#{requests.table.startTime}">Hasiera ordua</th>
-              <th th:text="#{requests.table.status}">Egoera</th>
-              <th th:text="#{requests.table.endTime}">Amaiera ordua</th>
-            </tr>
-          </thead>
-          <tbody id="sessions-table-body">
-            <tr class="loading-row">
-              <td colspan="7" th:text="#{requests.loading}">Datuak kargatzen...</td>
-            </tr>
-          </tbody>
-        </table>
       </div>
+
+      <table class="apps-table">
+        <thead>
+          <tr>
+            <th th:text="#{requests.table.sessionId}">Sesio IDa</th>
+            <th th:text="#{requests.table.sourceApp}">Jatorrizko APP</th>
+            <th th:text="#{requests.table.destApp}">Helmugako APP</th>
+            <th th:text="#{requests.table.securityLevel}">Segurtasun maila</th>
+            <th th:text="#{requests.table.startTime}">Hasiera ordua</th>
+            <th th:text="#{requests.table.status}">Egoera</th>
+            <th th:text="#{requests.table.endTime}">Amaiera ordua</th>
+          </tr>
+        </thead>
+        <tbody id="sessions-table-body">
+          <tr class="loading-row">
+            <td colspan="7" th:text="#{requests.loading}">Datuak kargatzen...</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
-
-    <!-- Eskuineko panela: Xehetasunak -->
-    <aside class="side-panel" id="session-panel" style="display: none;">
-      <div class="panel-header">
-        <div class="panel-dot" id="panel-dot"></div>
-        <span th:text="#{requests.detail.title}">Sesioaren xehetasunak</span>
-        <div style="flex: 1;"></div>
-        <button class="close-btn" id="close-panel-btn" th:text="#{requests.detail.close}">Itxi</button>
-      </div>
-
-      <div class="panel-body" id="session-detail-body">
-        <!-- Xehetasunak hemen agertuko dira -->
-      </div>
-    </aside>
-
   </main>
 
   <script type="module">
-  import { initLanguageSelector } from '/js/languageSelector.js';
-  initLanguageSelector('requests');
-</script>
+    import { initLanguageSelector } from '/js/languageSelector.js';
+    initLanguageSelector('requests');
+  </script>
 
   <script th:inline="javascript">
     window.requestsI18n = {
       empty: /*[[#{requests.empty}]]*/ "Ez dago sesio eskaerarik",
       error: /*[[#{requests.error}]]*/ "Errorea datuak kargatzean",
+      close: /*[[#{requests.detail.close}]]*/ "Itxi",
 
       // Detail panel labels
       securityLevel: /*[[#{requests.detail.securityLevel}]]*/ "Segurtasun maila",
@@ -162,11 +144,13 @@
         return;
       }
 
-      sessions.forEach(session => {
+      sessions.forEach((session, index) => {
+        // Errenkada normala
         const row = document.createElement('tr');
         row.style.cursor = 'pointer';
+        row.dataset.sessionId = session.sessionId;  // GEHITU identifikatzeko
+        row.dataset.index = index;  // GEHITU posizioa gordetzeko
 
-        // Format dates
         const startTime = session.startTime ? new Date(session.startTime).toLocaleString() : '—';
         const endTime = session.endTime ? new Date(session.endTime).toLocaleString() : '—';
 
@@ -180,9 +164,9 @@
         <td>${endTime}</td>
       `;
 
-        // Klik event-a gehitu
+        // Klik event-a
         row.addEventListener('click', () => {
-          loadSessionDetail(session.sessionId);
+          toggleDetailPanel(row, session.sessionId);
         });
 
         tbody.appendChild(row);
@@ -202,31 +186,61 @@
     `;
     }
 
-    function loadSessionDetail(sessionId) {
+
+
+    let currentDetailRow = null;  // Detaile panela irekita dagoen errenkada
+
+    function toggleDetailPanel(row, sessionId) {
+      // Dagoeneko irekita badago, itxi
+      if (currentDetailRow && currentDetailRow.dataset.sessionId === sessionId) {
+        closeDetailPanel();
+        return;
+      }
+
+      // Beste bat irekita badago, itxi lehenik
+      if (currentDetailRow) {
+        closeDetailPanel();
+      }
+
+      // Xehetasunak kargatu eta erakutsi
+      loadSessionDetail(row, sessionId);
+    }
+
+    function loadSessionDetail(row, sessionId) {
       fetch(`/api/sessions/${sessionId}`)
         .then(response => response.json())
         .then(detail => {
-          showSessionPanel(detail);
+          showDetailPanel(row, detail);
         })
         .catch(error => {
           console.error('Errorea xehetasunak kargatzean:', error);
         });
     }
 
-    function showSessionPanel(detail) {
-      const panel = document.getElementById('session-panel');
-      const panelBody = document.getElementById('session-detail-body');
-      const panelDot = document.getElementById('panel-dot');
+    function showDetailPanel(row, detail) {
+      // Detaile errenkada berria sortu
+      const detailRow = document.createElement('tr');
+      detailRow.classList.add('detail-row');
+      detailRow.dataset.sessionId = detail.sessionId;
 
-      // Panel-a erakutsi
-      panel.style.display = 'flex';
-      panelDot.style.background = '#7c3aed';
+      const detailCell = document.createElement('td');
+      detailCell.setAttribute('colspan', '7');
 
       // Edukia sortu
       let html = `
-      <div class="info-title">${detail.sessionId}</div>
-      <div class="section-label">${window.requestsI18n.securityLevel}: L${detail.securityLevel}</div>
-      <div class="section-label">${window.requestsI18n.status}: ${detail.status}</div>
+      <div class="detail-panel-content">
+        <div class="detail-panel-header">
+          <div class="detail-panel-title">
+            <div class="detail-panel-dot"></div>
+            <span>${detail.sessionId}</span>
+          </div>
+          <button class="close-btn" onclick="closeDetailPanel()">
+            ${window.requestsI18n.close || 'Itxi'}
+          </button>
+        </div>
+        
+        <div class="section-label">${window.requestsI18n.securityLevel}: L${detail.securityLevel}</div>
+        <div class="section-label">${window.requestsI18n.status}: ${detail.status}</div>
     `;
 
       // Xehetasunak gehitu status-en arabera
@@ -280,9 +294,34 @@
         }
       }
 
-      panelBody.innerHTML = html;
+      html += '</div>';
+      detailCell.innerHTML = html;
+      detailRow.appendChild(detailCell);
+
+      // Errenkadaren ondoren txertatu
+      row.parentNode.insertBefore(detailRow, row.nextSibling);
+
+      // Errenkada hautatu bezala markatu
+      row.classList.add('selected');
+
+      // Gorde erreferentzia
+      currentDetailRow = detailRow;
     }
 
+    function closeDetailPanel() {
+      if (currentDetailRow) {
+        // Errenkada aurkitu eta 'selected' klase kendu
+        const sessionId = currentDetailRow.dataset.sessionId;
+        const sessionRow = document.querySelector(`tr[data-session-id="${sessionId}"]`);
+        if (sessionRow) {
+          sessionRow.classList.remove('selected');
+        }
+
+        // Detaile panela kendu
+        currentDetailRow.remove();
+        currentDetailRow = null;
+      }
+    }
     // Itxi botoia
     document.getElementById('close-panel-btn').addEventListener('click', () => {
       document.getElementById('session-panel').style.display = 'none';

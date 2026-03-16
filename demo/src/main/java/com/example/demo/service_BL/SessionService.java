@@ -25,17 +25,20 @@ public class SessionService {
     private final SessionL2DetailsRepository l2Repository;
     private final SessionL3DetailsRepository l3Repository;
     private final SessionL4DetailsRepository l4Repository;
+    private final ArchitectureService architectureService;
 
     public SessionService(SessionRepository sessionRepository,
-                          SessionL1DetailsRepository l1Repository,
-                          SessionL2DetailsRepository l2Repository,
-                          SessionL3DetailsRepository l3Repository,
-                          SessionL4DetailsRepository l4Repository) {
+            SessionL1DetailsRepository l1Repository,
+            SessionL2DetailsRepository l2Repository,
+            SessionL3DetailsRepository l3Repository,
+            SessionL4DetailsRepository l4Repository,
+            ArchitectureService architectureService) {
         this.sessionRepository = sessionRepository;
         this.l1Repository = l1Repository;
         this.l2Repository = l2Repository;
         this.l3Repository = l3Repository;
         this.l4Repository = l4Repository;
+        this.architectureService = architectureService;
     }
 
     // App batek hasitako request kopurua
@@ -45,50 +48,53 @@ public class SessionService {
 
     // Sesio guztien laburpena lortu (taularentzat)
     public List<SessionSummaryDTO> getAllSessions() {
-    List<SessionE> sessions = sessionRepository.findAllWithRelations();  
-    
-    return sessions.stream().map(session -> {
-        String sourceAppId = session.getInitApp() != null ? session.getInitApp().getId() : null;
-        String destAppId = session.getTargetApp() != null ? session.getTargetApp().getId() : null;
-        
-        boolean showEndTime = SessionStatus.shouldShowEndTime(session.getStatus());
-        
-        return new SessionSummaryDTO(
-            session.getId(),
-            sourceAppId,
-            destAppId,
-            session.getSecurityLevel() != null ? session.getSecurityLevel().getId() : null,
-            session.getStartTime(),
-            session.getStatus(),
-            showEndTime ? session.getEndTime() : null
-        );
-    }).collect(Collectors.toList());
-}
+        List<SessionE> sessions = sessionRepository.findAllWithRelations();
+
+        return sessions.stream().map(session -> {
+            String sourceAppId = session.getInitApp() != null ? session.getInitApp().getId() : null;
+            String destAppId = session.getTargetApp() != null ? session.getTargetApp().getId() : null;
+
+            boolean showEndTime = SessionStatus.shouldShowEndTime(session.getStatus());
+
+            return new SessionSummaryDTO(
+                    session.getId(),
+                    sourceAppId,
+                    destAppId,
+                    session.getSecurityLevel() != null ? session.getSecurityLevel().getId() : null,
+                    session.getStartTime(),
+                    session.getStatus(),
+                    showEndTime ? session.getEndTime() : null
+            );
+        }).collect(Collectors.toList());
+    }
 
     // Sesio baten xehetasunak lortu (panelerantzat)
     public SessionDetailDTO getSessionDetail(String sessionId) {
         SessionE session = sessionRepository.findById(sessionId)
-            .orElseThrow(() -> new SessionNotFoundException(sessionId));
+                .orElseThrow(() -> new SessionNotFoundException(sessionId));
 
         SessionDetailDTO detail = new SessionDetailDTO();
         detail.setSessionId(session.getId());
         detail.setStatus(session.getStatus());
-        
+
         Integer secLevel = session.getSecurityLevel() != null ? session.getSecurityLevel().getId() : null;
         detail.setSecurityLevel(secLevel);
 
         // Xehetasunak kargatu status-en arabera
         String status = session.getStatus();
         if (SessionStatus.shouldShowDetails(session.getStatus())) {
-        loadDetailsByLevel(detail, sessionId, secLevel);
-    }
+            loadDetailsByLevel(detail, sessionId, secLevel);
+        }
+        detail.setTopology(architectureService.getArchitectureData());
 
         return detail;
     }
 
     // Xehetasunak kargatu security level-aren arabera
     private void loadDetailsByLevel(SessionDetailDTO detail, String sessionId, Integer level) {
-        if (level == null) return;
+        if (level == null) {
+            return;
+        }
 
         switch (level) {
             case 1:
@@ -100,8 +106,8 @@ public class SessionService {
             case 2:
                 List<SessionL2DetailsE> l2List = l2Repository.findBySessionIdOrderByHopOrder(sessionId);
                 List<SessionDetailDTO.L2HopDTO> hops = l2List.stream()
-                    .map(l2 -> new SessionDetailDTO.L2HopDTO(l2.getHopOrder(), l2.getKmsId()))
-                    .collect(Collectors.toList());
+                        .map(l2 -> new SessionDetailDTO.L2HopDTO(l2.getHopOrder(), l2.getKmsId()))
+                        .collect(Collectors.toList());
                 detail.setL2Hops(hops);
                 break;
             case 3:

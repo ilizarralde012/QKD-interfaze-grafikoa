@@ -2,6 +2,8 @@ package com.example.demo.dto;
 
 import java.util.List;
 
+import com.example.demo.model.ArchitectureData;
+
 public class SessionDetailDTO {
     private String sessionId;
     private Integer securityLevel;
@@ -22,6 +24,9 @@ public class SessionDetailDTO {
     // L4 xehetasunak (baldin badaude)
     private String initiatorId;
     private String responderId;
+
+    // Topologia informazioa
+    private ArchitectureData topology;
 
     // Constructor hutsa
     public SessionDetailDTO() {}
@@ -60,6 +65,9 @@ public class SessionDetailDTO {
     public String getResponderId() { return responderId; }
     public void setResponderId(String responderId) { this.responderId = responderId; }
 
+    public ArchitectureData getTopology() { return topology; }
+    public void setTopology(ArchitectureData topology) { this.topology = topology; }
+    
     // Klase txiki bat L2 hop-entzat
     public static class L2HopDTO {
         private Integer hopOrder;

@@ -1,7 +1,8 @@
 package com.example.demo.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Architecture.json fitxategiaren egitura
@@ -11,6 +12,9 @@ public class ArchitectureData {
     private List<Node> nodes;
     private List<Link> links;
     
+    @JsonProperty("classical-links")
+    private List<Link> classicalLinks;
+    
     public static class Node {
         private String id;
         
@@ -19,17 +23,13 @@ public class ArchitectureData {
         
         private String site;
         
-        @JsonProperty("has_kms")
-        private Boolean hasKms;
+        @JsonProperty("vKMS")
+        private String vkms;
         
-        @JsonProperty("kms_ids")
-        private List<String> kmsIds;
+        @JsonProperty("vkms_address")
+        private String vkmsAddress;
         
-        @JsonProperty("vkms_id")
-        private String vkmsId;
-        
-        private Double x;
-        private Double y;
+        private String address;
         
         // Getters y setters
         public String getId() { return id; }
@@ -41,28 +41,22 @@ public class ArchitectureData {
         public String getSite() { return site; }
         public void setSite(String site) { this.site = site; }
         
-        public Boolean getHasKms() { return hasKms; }
-        public void setHasKms(Boolean hasKms) { this.hasKms = hasKms; }
+        public String getVkms() { return vkms; }
+        public void setVkms(String vkms) { this.vkms = vkms; }
         
-        public List<String> getKmsIds() { return kmsIds; }
-        public void setKmsIds(List<String> kmsIds) { this.kmsIds = kmsIds; }
+        public String getVkmsAddress() { return vkmsAddress; }
+        public void setVkmsAddress(String vkmsAddress) { this.vkmsAddress = vkmsAddress; }
         
-        public String getVkmsId() { return vkmsId; }
-        public void setVkmsId(String vkmsId) { this.vkmsId = vkmsId; }
-        
-        public Double getX() { return x; }
-        public void setX(Double x) { this.x = x; }
-        
-        public Double getY() { return y; }
-        public void setY(Double y) { this.y = y; }
+        public String getAddress() { return address; }
+        public void setAddress(String address) { this.address = address; }
     }
     
     public static class Link {
         private String source;
         private String target;
         
-        @JsonProperty("link_type")
-        private String linkType;
+        @JsonProperty("quantum_link")
+        private Boolean quantumLink;
         
         // Getters y setters
         public String getSource() { return source; }
@@ -71,8 +65,8 @@ public class ArchitectureData {
         public String getTarget() { return target; }
         public void setTarget(String target) { this.target = target; }
         
-        public String getLinkType() { return linkType; }
-        public void setLinkType(String linkType) { this.linkType = linkType; }
+        public Boolean getQuantumLink() { return quantumLink; }
+        public void setQuantumLink(Boolean quantumLink) { this.quantumLink = quantumLink; }
     }
     
     // Getters y setters
@@ -81,4 +75,7 @@ public class ArchitectureData {
     
     public List<Link> getLinks() { return links; }
     public void setLinks(List<Link> links) { this.links = links; }
+    
+    public List<Link> getClassicalLinks() { return classicalLinks; }
+    public void setClassicalLinks(List<Link> classicalLinks) { this.classicalLinks = classicalLinks; }
 }

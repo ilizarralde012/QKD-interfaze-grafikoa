@@ -148,8 +148,8 @@
         // Errenkada normala
         const row = document.createElement('tr');
         row.style.cursor = 'pointer';
-        row.dataset.sessionId = session.sessionId;  // GEHITU identifikatzeko
-        row.dataset.index = index;  // GEHITU posizioa gordetzeko
+        row.dataset.sessionId = session.sessionId;  
+        row.dataset.index = index;  
 
         const startTime = session.startTime ? new Date(session.startTime).toLocaleString() : '—';
         const endTime = session.endTime ? new Date(session.endTime).toLocaleString() : '—';
@@ -475,15 +475,12 @@
         .text(d => d.id);
 
       // vKMS (behean ezkerrean)
-     // vKMS (eskuinean)
-      siteGroups.append('circle')
+     siteGroups.append('circle')
         .attr('class', 'vkms-node')
-        .attr('cx', 35)  // Eskuinean
-        .attr('cy', 15)  // Behean
+        .attr('data-site-id', d => d.id)  
+        .attr('cx', 35)
+        .attr('cy', 15)
         .attr('r', 18)
-        .attr('fill', '#d1fae5')
-        .attr('stroke', '#10b981')
-        .attr('stroke-width', 2);
       
       siteGroups.append('text')
         .attr('x', 35)
@@ -610,17 +607,40 @@
       const passiveSite = findSiteByVkms(topology, detail.passiveId);
       const relaySite = findSiteByVkms(topology, detail.relayId);
 
-      if (receiverSite) highlightSiteBox(g, receiverSite, '#3b82f6', 'Receiver');
-      if (passiveSite) highlightSiteBox(g, passiveSite, '#eab308', 'Passive');
-      if (relaySite) highlightSiteBox(g, relaySite, '#10b981', 'Relay');
+      // Rolak konbinatu Site berean badaude
+      const siteRoles = {};
+      
+      if (receiverSite) {
+        if (!siteRoles[receiverSite]) siteRoles[receiverSite] = [];
+        siteRoles[receiverSite].push({role: 'Receiver', color: '#3b82f6'});
+      }
+      if (passiveSite) {
+        if (!siteRoles[passiveSite]) siteRoles[passiveSite] = [];
+        siteRoles[passiveSite].push({role: 'Passive', color: '#eab308'});
+      }
+      if (relaySite) {
+        if (!siteRoles[relaySite]) siteRoles[relaySite] = [];
+        siteRoles[relaySite].push({role: 'Relay', color: '#10b981'});
+      }
+      
+      // Site bakoitzeko rol guztiak konbinatu
+      Object.entries(siteRoles).forEach(([siteId, roles]) => {
+        const combinedLabel = roles.map(r => r.role).join(' + ');
+        const primaryColor = roles[0].color;  // Lehenengo kolorea erabili
+        highlightVKMSNode(g, siteId, primaryColor, combinedLabel);
+      });
     }
 
     function highlightL4(detail, g, topology) {
       const initiatorSite = findSiteByVkms(topology, detail.initiatorId);
       const responderSite = findSiteByVkms(topology, detail.responderId);
 
-      if (initiatorSite) highlightSiteBox(g, initiatorSite, '#3b82f6', 'Initiator');
-      if (responderSite) highlightSiteBox(g, responderSite, '#10b981', 'Responder');
+      if (initiatorSite) {
+        highlightVKMSNode(g, initiatorSite, '#3b82f6', 'Initiator');
+      }
+      if (responderSite) {
+        highlightVKMSNode(g, responderSite, '#10b981', 'Responder');
+      }
     }
 
     // Laguntzaileak
@@ -681,16 +701,41 @@
     }
 
     function findSiteByVkms(topology, vkmsId) {
-      const node = topology.nodes.find(n => n.vkms === vkmsId && n.node_type !== 'KMS');
+      const node = topology.nodes.find(n => n.vKMS === vkmsId && (n.node_type === 'CN' || n.node_type === 'QN'));
       return node ? node.id : null;
     }
 
-  </script>
+    function highlightVKMSNode(g, siteId, color, label) {
+      const vkmsNode = g.selectAll('.vkms-node')
+        .filter(function() {
+          return d3.select(this).attr('data-site-id') === siteId;
+        });
+      
+      vkmsNode
+        .attr('stroke', color)
+        .attr('stroke-width', 3)
+        .style('filter', `drop-shadow(0 0 8px ${color}99)`);
+      
+      // Label gehitu
+      if (!vkmsNode.empty() && label) {
+        const cx = parseFloat(vkmsNode.attr('cx'));
+        const cy = parseFloat(vkmsNode.attr('cy'));
+        
+        vkmsNode.each(function() {
+          const parent = this.parentNode;
+          d3.select(parent)
+            .append('text')
+            .attr('class', 'highlight-label')
+            .attr('x', cx + 25)
+            .attr('y', cy + 4)
+            .attr('font-size', '10px')
+            .attr('font-weight', '600')
+            .attr('fill', color)
+            .text(label);
+        });
+      }
+    }
 
-
-  <script type="module">
-    import { initLanguageSelector } from '/js/languageSelector.js';
-    initLanguageSelector('requests');
   </script>
 
 </body>

@@ -1,0 +1,35 @@
+# Java compiled files
+*.class
+*.jar
+*.war
+*.ear
+target/
+out/
+build/
+
+# IDE files
+.idea/
+*.iml
+.vscode/
+.classpath
+.project
+.settings/
+
+# SSL Certificates (Ez kargatu Git-era)
+*.p12
+*.pem
+keystore.*
+key.pem
+certificate.pem
+
+# Pasahitzak eta konfigurazio sentikorrak
+application-local.properties
+application-prod.properties
+
+# Logs
+*.log
+logs/
+
+# OS files
+.DS_Store
+Thumbs.db

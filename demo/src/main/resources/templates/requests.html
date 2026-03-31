@@ -148,8 +148,8 @@
         // Errenkada normala
         const row = document.createElement('tr');
         row.style.cursor = 'pointer';
-        row.dataset.sessionId = session.sessionId;  
-        row.dataset.index = index;  
+        row.dataset.sessionId = session.sessionId;
+        row.dataset.index = index;
 
         const startTime = session.startTime ? new Date(session.startTime).toLocaleString() : '—';
         const endTime = session.endTime ? new Date(session.endTime).toLocaleString() : '—';
@@ -395,33 +395,76 @@
       svg.call(zoom);
 
       // Classical links marraztu (Site artean)
-      // GARRANTZITSUA: JSON-ean "classical-links" da (hyphen), ez classicalLinks
       const classicalLinks = (topology['classical-links'] || []).map(link => ({
         source: link.source,
-        target: link.target
+        target: link.target,
+        type: 'classical'
       }));
+
+      // Quantum links prozesatu (KMS artean -> Site-etara mapatu)
+      const quantumLinks = (topology.links || [])
+        .filter(link => link.quantum_link === true)
+        .map(link => {
+          // KMS-ak zein Site-tan dauden aurkitu
+          const sourceKMS = topology.nodes.find(n => n.id === link.source);
+          const targetKMS = topology.nodes.find(n => n.id === link.target);
+
+          if (sourceKMS && targetKMS) {
+            return {
+              source: sourceKMS.site,
+              target: targetKMS.site,
+              type: 'quantum',
+              sourceKMS: link.source,
+              targetKMS: link.target
+            };
+          }
+          return null;
+        })
+        .filter(link => link !== null);
+
+      // Lotura guztiak batu
+      const allLinks = [...classicalLinks, ...quantumLinks];
 
       console.log('Sites:', sites.map(s => s.id));
       console.log('Classical Links:', classicalLinks);
+      console.log('Quantum Links:', quantumLinks);
 
       const simulation = d3.forceSimulation(sites)
-        .force('link', d3.forceLink(classicalLinks).id(d => d.id).distance(200))
-        .force('charge', d3.forceManyBody().strength(-2500))
-        .force('center', d3.forceCenter(width / 2, height / 2))
-        .force('collision', d3.forceCollide().radius(150))
-        .alpha(2)
-        .alphaDecay(0.01);
+        .force('link', d3.forceLink(allLinks).id(d => d.id).distance(300).strength(0.8))
+        .force('charge', d3.forceManyBody().strength(-3000))
+        .force('center', d3.forceCenter(width / 2, height / 2).strength(0.05))
+        .force('collision', d3.forceCollide().radius(100))
+        .force('x', d3.forceX(width / 2).strength(0.02))
+        .force('y', d3.forceY(height / 2).strength(0.02))
+        .velocityDecay(0.5)
+        .alpha(1.5)
+        .alphaDecay(0.015);
 
-      // Classical links (Site artean)
-      const links = g.append('g')
+      // Classical links (lerro zuzenak)
+      const classicalLinksSel = g.append('g')
+        .attr('class', 'classical-links-group')
         .selectAll('line')
         .data(classicalLinks)
         .enter()
         .append('line')
         .attr('class', 'classical-link')
         .attr('stroke', '#3b82f6')
-        .attr('stroke-width', 2)
+        .attr('stroke-width', 4)
         .attr('stroke-opacity', 0.4);
+
+      // Quantum links (kurbak)
+      const quantumLinksSel = g.append('g')
+        .attr('class', 'quantum-links-group')
+        .selectAll('path')
+        .data(quantumLinks)
+        .enter()
+        .append('path')
+        .attr('class', 'quantum-link')
+        .attr('fill', 'none')
+        .attr('stroke', '#a855f7')
+        .attr('stroke-width', 5)
+        .attr('stroke-opacity', 0.6)
+        .attr('stroke-dasharray', '5,5');
 
       // Site kaxak
       // Drag behavior definitu
@@ -474,35 +517,17 @@
         .attr('fill', '#1a1d2e')
         .text(d => d.id);
 
-      // vKMS (behean ezkerrean)
-     siteGroups.append('circle')
-        .attr('class', 'vkms-node')
-        .attr('data-site-id', d => d.id)  
-        .attr('cx', 35)
-        .attr('cy', 15)
-        .attr('r', 18)
-      
-      siteGroups.append('text')
-        .attr('x', 35)
-        .attr('y', 19)
-        .attr('text-anchor', 'middle')
-        .attr('dominant-baseline', 'middle')
-        .attr('font-size', '7px')
-        .attr('font-weight', '700')
-        .attr('fill', '#000000')
-        .attr('pointer-events', 'none')
-        .text(d => d.vkms);
-      
       // vKMS (eskuinean)
       siteGroups.append('circle')
         .attr('class', 'vkms-node')
-        .attr('cx', 35)  // Eskuinean
-        .attr('cy', 15)  // Behean
+        .attr('data-site-id', d => d.id)  // ← HAU BADAGO?
+        .attr('cx', 35)
+        .attr('cy', 15)
         .attr('r', 18)
         .attr('fill', '#d1fae5')
         .attr('stroke', '#10b981')
         .attr('stroke-width', 2);
-      
+
       siteGroups.append('text')
         .attr('x', 35)
         .attr('y', 19)
@@ -513,16 +538,16 @@
         .attr('fill', '#000000')
         .attr('pointer-events', 'none')
         .text(d => d.vkms);
-      
+
       // KMS-ak (ezkerrean, goitik hasita)
-      siteGroups.each(function(d) {
+      siteGroups.each(function (d) {
         const group = d3.select(this);
         const kmsCount = d.kms.length;
-        
+
         d.kms.forEach((kmsId, i) => {
           // Hasi goitik (-20) eta behera joan
           const yPos = -20 + (i * 35);
-          
+
           group.append('circle')
             .attr('class', 'kms-node')
             .attr('data-kms-id', kmsId)
@@ -532,7 +557,7 @@
             .attr('fill', '#fef3c7')
             .attr('stroke', '#f59e0b')
             .attr('stroke-width', 2);
-          
+
           group.append('text')
             .attr('x', -35)
             .attr('y', yPos + 19)
@@ -546,11 +571,22 @@
 
       // Simulazioa tick
       simulation.on('tick', () => {
-        links
+        // Classical links: lerro zuzenak
+        classicalLinksSel
           .attr('x1', d => d.source.x)
           .attr('y1', d => d.source.y)
           .attr('x2', d => d.target.x)
           .attr('y2', d => d.target.y);
+
+        // Quantum links: kurbak
+        quantumLinksSel
+          .attr('d', d => {
+            const dx = d.target.x - d.source.x;
+            const dy = d.target.y - d.source.y;
+            const dr = Math.sqrt(dx * dx + dy * dy) * 1.5; // Kurba erradioa
+
+            return `M ${d.source.x},${d.source.y} A ${dr},${dr} 0 0,1 ${d.target.x},${d.target.y}`;
+          });
 
         siteGroups.attr('transform', d => `translate(${d.x},${d.y})`);
       });
@@ -561,15 +597,109 @@
         // Nabarmentzeak aplikatu
         applyHighlights(detail, g, topology);
       }, 2000);
+
+      // Legenda gehitu
+      const legend = svg.append('g')
+        .attr('class', 'topology-legend')
+        .attr('transform', 'translate(20, 20)');
+
+      // Classical link adibidea
+      legend.append('line')
+        .attr('x1', 0)
+        .attr('y1', 0)
+        .attr('x2', 40)
+        .attr('y2', 0)
+        .attr('stroke', '#3b82f6')
+        .attr('stroke-width', 2)
+        .attr('stroke-opacity', 0.6);
+
+      legend.append('text')
+        .attr('x', 50)
+        .attr('y', 4)
+        .attr('font-size', '12px')
+        .attr('fill', '#000')
+        .text('Classical Link');
+
+      // Quantum link adibidea
+      legend.append('line')
+        .attr('x1', 0)
+        .attr('y1', 25)
+        .attr('x2', 40)
+        .attr('y2', 25)
+        .attr('stroke', '#a855f7')
+        .attr('stroke-width', 3)
+        .attr('stroke-opacity', 0.6)
+        .attr('stroke-dasharray', '5,5');
+
+      legend.append('text')
+        .attr('x', 50)
+        .attr('y', 29)
+        .attr('font-size', '12px')
+        .attr('fill', '#000')
+        .text('Quantum Link');
+    }
+function resetHighlights(g) {
+      // KMS nodoak
+      g.selectAll('.kms-node')
+        .attr('stroke', '#f59e0b')
+        .attr('stroke-width', 2)
+        .style('filter', 'none')
+        .style('opacity', 1);
+      
+      // vKMS nodoak
+      g.selectAll('.vkms-node')
+        .attr('stroke', '#10b981')
+        .attr('stroke-width', 2)
+        .style('filter', 'none')
+        .style('opacity', 1);
+      
+      // Classical links
+      g.selectAll('.classical-link')
+        .attr('stroke', '#3b82f6')
+        .attr('stroke-width', 4)
+        .attr('stroke-opacity', 0.4);
+      
+      // Quantum links
+      g.selectAll('.quantum-link')
+        .attr('stroke', '#a855f7')
+        .attr('stroke-width', 5)
+        .attr('stroke-opacity', 0.6);
+      
+      // Kendu highlight labels
+      g.selectAll('.highlight-label').remove();
+    }
+
+    /**
+     * Lausotu elementu guztiak (parte hartzen ez dutenak)
+     */
+    function dimAll(g) {
+      // Nodoak lausotu
+      g.selectAll('.kms-node').style('opacity', 0.15);
+      g.selectAll('.vkms-node').style('opacity', 0.15);
+      
+      // Site kaxak lausotu
+      g.selectAll('.site-box')
+        .style('opacity', 0.3)
+        .style('filter', 'blur(1px)');
+      
+      // Site izenak lausotu
+      g.selectAll('.site-label').style('opacity', 0.3);
+      
+      // Loturak lausotu
+      g.selectAll('.classical-link')
+        .attr('stroke-opacity', 0.08);
+      
+      g.selectAll('.quantum-link')
+        .attr('stroke-opacity', 0.08);
     }
 
     function applyHighlights(detail, g, topology) {
       const secLevel = detail.securityLevel;
 
       if (secLevel === 1) {
-        highlightL1(detail, g);
+        highlightL1(detail, g, topology);
       } else if (secLevel === 2) {
-        highlightL2(detail, g);
+        highlightL2(detail, g, topology);
       } else if (secLevel === 3) {
         highlightL3(detail, g, topology);
       } else if (secLevel === 4) {
@@ -577,69 +707,298 @@
       }
     }
 
-    function highlightL1(detail, g) {
+    function highlightL1(detail, g, topology) {
+      console.log('=== L1 DEBUG ===');
+      console.log('kmsSrcId:', detail.kmsSrcId);
+      console.log('kmsDstId:', detail.kmsDstId);
+      
+      // Lausotu guztiak
+      dimAll(g);
+      
       const kmsSrc = detail.kmsSrcId;
       const kmsDst = detail.kmsDstId;
 
       if (kmsSrc) {
+        // Birgaitu nodoa
+        g.selectAll('.kms-node')
+          .filter(function() { return d3.select(this).attr('data-kms-id') === kmsSrc; })
+          .style('opacity', 1);
+        
         highlightKMSNode(g, kmsSrc, '#3b82f6', 'Source');
+        
+        const srcNode = topology.nodes.find(n => n.id === kmsSrc);
+        if (srcNode) {
+          const srcSite = srcNode.site;
+          
+          // Birgaitu Site-a
+          g.selectAll('.site-group')
+            .filter(d => d.id === srcSite)
+            .selectAll('.site-box, .site-label')
+            .style('opacity', 1)
+            .style('filter', 'none');
+          
+          const dstNode = topology.nodes.find(n => n.id === kmsDst);
+          if (dstNode) {
+            const dstSite = dstNode.site;
+            
+            // Birgaitu helmuga Site-a
+            g.selectAll('.site-group')
+              .filter(d => d.id === dstSite)
+              .selectAll('.site-box, .site-label')
+              .style('opacity', 1)
+              .style('filter', 'none');
+            
+            highlightQuantumLink(g, srcSite, dstSite, '#10b981');
+          }
+        }
       }
+      
       if (kmsDst) {
+        // Birgaitu nodoa
+        g.selectAll('.kms-node')
+          .filter(function() { return d3.select(this).attr('data-kms-id') === kmsDst; })
+          .style('opacity', 1);
+        
         highlightKMSNode(g, kmsDst, '#10b981', 'Dest');
       }
     }
 
-    function highlightL2(detail, g) {
+    function highlightL2(detail, g, topology) {
       if (!detail.l2Hops) return;
+
+      // Lausotu guztiak
+      dimAll(g);
 
       const colors = ['#3b82f6', '#eab308', '#10b981'];
       const labels = ['Hop 1', 'Hop 2', 'Hop 3'];
 
       detail.l2Hops.forEach((hop, i) => {
+        // Birgaitu nodoa
+        g.selectAll('.kms-node')
+          .filter(function() { return d3.select(this).attr('data-kms-id') === hop.kmsId; })
+          .style('opacity', 1);
+        
         const color = colors[i % colors.length];
         const label = labels[i] || `Hop ${i + 1}`;
         highlightKMSNode(g, hop.kmsId, color, label);
+        
+        // Birgaitu Site-a
+        const node = topology.nodes.find(n => n.id === hop.kmsId);
+        if (node) {
+          g.selectAll('.site-group')
+            .filter(d => d.id === node.site)
+            .selectAll('.site-box, .site-label')
+            .style('opacity', 1)
+            .style('filter', 'none');
+        }
       });
-    }
 
+      // Quantum links nabarmendu
+      for (let i = 0; i < detail.l2Hops.length - 1; i++) {
+        const srcKmsId = detail.l2Hops[i].kmsId;
+        const dstKmsId = detail.l2Hops[i + 1].kmsId;
+
+        const srcNode = topology.nodes.find(n => n.id === srcKmsId);
+        const dstNode = topology.nodes.find(n => n.id === dstKmsId);
+
+        if (srcNode && dstNode && srcNode.site !== dstNode.site) {
+          const color = colors[i % colors.length];
+          highlightQuantumLink(g, srcNode.site, dstNode.site, color);
+        }
+      }
+    }
+    function findShortestPath(classicalLinks, startSite, endSite) {
+      if (startSite === endSite) return [startSite];
+
+      // Grafo eraiki (adjacency list)
+      const graph = new Map();
+
+      classicalLinks.forEach(link => {
+        const src = typeof link.source === 'object' ? link.source.id : link.source;
+        const tgt = typeof link.target === 'object' ? link.target.id : link.target;
+
+        if (!graph.has(src)) graph.set(src, []);
+        if (!graph.has(tgt)) graph.set(tgt, []);
+
+        graph.get(src).push(tgt);
+        graph.get(tgt).push(src);
+      });
+
+      // BFS algoritmo
+      let bfsQueue = [];  // ← let erabili
+      bfsQueue.push([startSite]);  // ← push erabili
+      const visited = new Set([startSite]);
+
+      while (bfsQueue.length > 0) {
+        const path = bfsQueue[0];  // ← lehenengo elementua lortu
+        bfsQueue = bfsQueue.slice(1);  // ← lehenengo elementua kendu (shift ordez)
+        
+        const current = path[path.length - 1];
+
+        if (current === endSite) {
+          console.log('Path found:', path);
+          return path;
+        }
+
+        const neighbors = graph.get(current) || [];
+        for (const neighbor of neighbors) {
+          if (!visited.has(neighbor)) {
+            visited.add(neighbor);
+            bfsQueue.push([...path, neighbor]);
+          }
+        }
+      }
+
+      console.log('No path found from', startSite, 'to', endSite);
+      return null;
+    }
     function highlightL3(detail, g, topology) {
       const receiverSite = findSiteByVkms(topology, detail.receiverId);
       const passiveSite = findSiteByVkms(topology, detail.passiveId);
       const relaySite = findSiteByVkms(topology, detail.relayId);
 
-      // Rolak konbinatu Site berean badaude
+      console.log('=== L3 DEBUG ===');
+      console.log('Receiver:', receiverSite);
+      console.log('Passive:', passiveSite);
+      console.log('Relay:', relaySite);
+
+      // Lausotu guztiak
+      dimAll(g);
+
+      // Birgaitu parte hartzen duten Site-ak
+      [receiverSite, passiveSite, relaySite].forEach(siteId => {
+        if (siteId) {
+          g.selectAll('.site-group')
+            .filter(d => d.id === siteId)
+            .selectAll('.site-box, .site-label')
+            .style('opacity', 1)
+            .style('filter', 'none');
+          
+          // vKMS birgaitu
+          g.selectAll('.vkms-node')
+            .filter(function() { return d3.select(this).attr('data-site-id') === siteId; })
+            .style('opacity', 1);
+        }
+      });
+
+      // Rolak konbinatu
       const siteRoles = {};
-      
+
       if (receiverSite) {
         if (!siteRoles[receiverSite]) siteRoles[receiverSite] = [];
-        siteRoles[receiverSite].push({role: 'Receiver', color: '#3b82f6'});
+        siteRoles[receiverSite].push({ role: 'Receiver', color: '#3b82f6' });
       }
       if (passiveSite) {
         if (!siteRoles[passiveSite]) siteRoles[passiveSite] = [];
-        siteRoles[passiveSite].push({role: 'Passive', color: '#eab308'});
+        siteRoles[passiveSite].push({ role: 'Passive', color: '#eab308' });
       }
       if (relaySite) {
         if (!siteRoles[relaySite]) siteRoles[relaySite] = [];
-        siteRoles[relaySite].push({role: 'Relay', color: '#10b981'});
+        siteRoles[relaySite].push({ role: 'Relay', color: '#10b981' });
       }
-      
-      // Site bakoitzeko rol guztiak konbinatu
+
+      // vKMS-ak nabarmendu
       Object.entries(siteRoles).forEach(([siteId, roles]) => {
         const combinedLabel = roles.map(r => r.role).join(' + ');
-        const primaryColor = roles[0].color;  // Lehenengo kolorea erabili
+        const primaryColor = roles[0].color;
         highlightVKMSNode(g, siteId, primaryColor, combinedLabel);
       });
+
+      // Classical links lortu
+      const classicalLinks = (topology['classical-links'] || []).map(link => ({
+        source: link.source,
+        target: link.target
+      }));
+
+      // LOTURAK NABARMENDU
+      if (receiverSite && relaySite && receiverSite !== relaySite) {
+        const path = findShortestPath(classicalLinks, receiverSite, relaySite);
+        console.log('Receiver → Relay path:', path);
+
+        if (path) {
+          for (let i = 0; i < path.length - 1; i++) {
+            highlightClassicalLink(g, path[i], path[i + 1], '#3b82f6');
+            
+            // Birgaitu bitarteko Site-ak ere
+            [path[i], path[i + 1]].forEach(siteId => {
+              g.selectAll('.site-group')
+                .filter(d => d.id === siteId)
+                .selectAll('.site-box, .site-label')
+                .style('opacity', 1)
+                .style('filter', 'none');
+            });
+          }
+        }
+      }
+
+      if (receiverSite && passiveSite && receiverSite !== passiveSite) {
+        const path = findShortestPath(classicalLinks, receiverSite, passiveSite);
+        console.log('Receiver → Passive path:', path);
+
+        if (path) {
+          for (let i = 0; i < path.length - 1; i++) {
+            highlightClassicalLink(g, path[i], path[i + 1], '#eab308');
+            
+            // Birgaitu bitarteko Site-ak
+            [path[i], path[i + 1]].forEach(siteId => {
+              g.selectAll('.site-group')
+                .filter(d => d.id === siteId)
+                .selectAll('.site-box, .site-label')
+                .style('opacity', 1)
+                .style('filter', 'none');
+            });
+          }
+        }
+      }
+
+      if (relaySite && passiveSite && relaySite !== passiveSite) {
+        console.log('Relay → Passive: quantum direct');
+        highlightQuantumLink(g, relaySite, passiveSite, '#10b981');
+      }
     }
 
     function highlightL4(detail, g, topology) {
       const initiatorSite = findSiteByVkms(topology, detail.initiatorId);
       const responderSite = findSiteByVkms(topology, detail.responderId);
 
+      // Lausotu guztiak
+      dimAll(g);
+
       if (initiatorSite) {
+        // Birgaitu Site-a
+        g.selectAll('.site-group')
+          .filter(d => d.id === initiatorSite)
+          .selectAll('.site-box, .site-label')
+          .style('opacity', 1)
+          .style('filter', 'none');
+        
+        // vKMS birgaitu
+        g.selectAll('.vkms-node')
+          .filter(function() { return d3.select(this).attr('data-site-id') === initiatorSite; })
+          .style('opacity', 1);
+        
         highlightVKMSNode(g, initiatorSite, '#3b82f6', 'Initiator');
       }
+      
       if (responderSite) {
+        // Birgaitu Site-a
+        g.selectAll('.site-group')
+          .filter(d => d.id === responderSite)
+          .selectAll('.site-box, .site-label')
+          .style('opacity', 1)
+          .style('filter', 'none');
+        
+        // vKMS birgaitu
+        g.selectAll('.vkms-node')
+          .filter(function() { return d3.select(this).attr('data-site-id') === responderSite; })
+          .style('opacity', 1);
+        
         highlightVKMSNode(g, responderSite, '#10b981', 'Responder');
+      }
+
+      // Classical link nabarmendu
+      if (initiatorSite && responderSite) {
+        highlightClassicalLink(g, initiatorSite, responderSite, '#3b82f6');
       }
     }
 
@@ -706,22 +1065,36 @@
     }
 
     function highlightVKMSNode(g, siteId, color, label) {
+      console.log('=== highlightVKMSNode DEBUG ===');
+      console.log('Looking for siteId:', siteId);
+
+      const allVKMS = g.selectAll('.vkms-node');
+      console.log('Total vKMS nodes:', allVKMS.size());
+
+      allVKMS.each(function () {
+        const attrValue = d3.select(this).attr('data-site-id');
+        console.log('vKMS node has data-site-id:', attrValue);
+      });
+
       const vkmsNode = g.selectAll('.vkms-node')
-        .filter(function() {
-          return d3.select(this).attr('data-site-id') === siteId;
+        .filter(function () {
+          const attrValue = d3.select(this).attr('data-site-id');
+          console.log('Comparing:', attrValue, '===', siteId, '?', attrValue === siteId);
+          return attrValue === siteId;
         });
-      
+
+      console.log('Matched vKMS nodes:', vkmsNode.size());
+
       vkmsNode
         .attr('stroke', color)
         .attr('stroke-width', 3)
         .style('filter', `drop-shadow(0 0 8px ${color}99)`);
-      
-      // Label gehitu
+
       if (!vkmsNode.empty() && label) {
         const cx = parseFloat(vkmsNode.attr('cx'));
         const cy = parseFloat(vkmsNode.attr('cy'));
-        
-        vkmsNode.each(function() {
+
+        vkmsNode.each(function () {
           const parent = this.parentNode;
           d3.select(parent)
             .append('text')
@@ -734,6 +1107,63 @@
             .text(label);
         });
       }
+    }
+    // Classical link nabarmendu
+    function highlightClassicalLink(g, sourceSite, targetSite, color) {
+      console.log('=== highlightClassicalLink DEBUG ===');
+      console.log('Looking for:', sourceSite, '↔', targetSite);
+
+      const matched = g.selectAll('.classical-link')
+        .filter(function () {
+          const line = d3.select(this);
+          const data = line.datum();
+
+          // D3-k source/target objektu bihur ditzake
+          const srcId = typeof data.source === 'object' ? data.source.id : data.source;
+          const tgtId = typeof data.target === 'object' ? data.target.id : data.target;
+
+          console.log('Checking classical link:', srcId, '↔', tgtId);
+
+          return (srcId === sourceSite && tgtId === targetSite) ||
+            (srcId === targetSite && tgtId === sourceSite);
+        });
+
+      console.log('Matched classical links:', matched.size());
+
+      matched
+        .attr('stroke', color)
+        .attr('stroke-width', 6)
+        .attr('stroke-opacity', 0.9)
+        .style('filter', `drop-shadow(0 0 8px ${color}99)`);
+    }
+
+    // Quantum link nabarmendu
+    function highlightQuantumLink(g, sourceSite, targetSite, color) {
+      console.log('=== highlightQuantumLink DEBUG ===');
+      console.log('Looking for:', sourceSite, '↔', targetSite);
+
+      const matched = g.selectAll('.quantum-link')
+        .filter(function () {
+          const path = d3.select(this);
+          const data = path.datum();
+
+          // D3-k source/target objektu bihur ditzake
+          const srcId = typeof data.source === 'object' ? data.source.id : data.source;
+          const tgtId = typeof data.target === 'object' ? data.target.id : data.target;
+
+          console.log('Checking quantum link:', srcId, '↔', tgtId);
+
+          return (srcId === sourceSite && tgtId === targetSite) ||
+            (srcId === targetSite && tgtId === sourceSite);
+        });
+
+      console.log('Matched quantum links:', matched.size());
+
+      matched
+        .attr('stroke', color)
+        .attr('stroke-width', 7)
+        .attr('stroke-opacity', 0.9)
+        .style('filter', `drop-shadow(0 0 10px ${color}99)`);
     }
 
   </script>

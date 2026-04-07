@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="eu" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Network Topology</title>
+  
+  <!-- Google-ko letrak -->
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  
+  <!-- Aplikazioaren CSS (aldagaiak eta estiloak) -->
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body class="login-body">
+  
+  <!-- Brand -->
+  <div class="login-brand">Network Topology</div>
+
+  <!-- Login Panel -->
+  <div class="login-panel">
+    
+    <!-- Header -->
+    <div class="login-header">
+      <h1 class="login-title">Hasi saioa</h1>
+      <p class="login-subtitle">Sartu zure EHU kredentzialak</p>
+    </div>
+
+    <!-- Error Alert -->
+    <div th:if="${param.error}" class="alert alert-error">
+      <span class="alert-icon">⚠️</span>
+      <div class="alert-content">
+        <strong>Autentikazio errorea</strong><br>
+        Erabiltzaile izena edo pasahitza ez dira zuzenak. Egiaztatu EHU VPN-era konektatuta zaudela.
+      </div>
+    </div>
+
+    <!-- Success Alert -->
+    <div th:if="${param.logout}" class="alert alert-success">
+      <span class="alert-icon">✓</span>
+      <div class="alert-content">Saioa ondo itxi duzu</div>
+    </div>
+
+    <!-- Login Form -->
+    <form th:action="@{/login}" method="post" class="login-form">
+      
+      <!-- Username -->
+      <div class="form-group">
+        <label class="form-label" for="username">Erabiltzaile izena</label>
+        <input 
+          type="text" 
+          id="username" 
+          name="username" 
+          class="form-input" 
+          placeholder="zure erabiltzailea"
+          required 
+          autofocus
+          autocomplete="username"
+        >
+      </div>
+
+      <!-- Password -->
+      <div class="form-group">
+        <label class="form-label" for="password">Pasahitza</label>
+        <input 
+          type="password" 
+          id="password" 
+          name="password" 
+          class="form-input" 
+          placeholder="••••••••"
+          required
+          autocomplete="current-password"
+        >
+      </div>
+
+      <!-- Submit Button -->
+      <button type="submit" class="btn-primary">
+        Sartu
+      </button>
+    </form>
+
+    <!-- Footer -->
+    <div class="login-footer">
+      <div class="login-footer-text">
+        EHU LDAP autentikazioa
+      </div>
+      <div class="login-footer-hint">
+        <span class="login-hint-icon">🔒</span>
+        <span>EHU VPN konexioa beharrezkoa da</span>
+      </div>
+    </div>
+
+  </div>
+
+</body>
+</html>

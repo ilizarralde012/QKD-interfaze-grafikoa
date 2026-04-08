@@ -1,5 +1,7 @@
 <!DOCTYPE html>
-<html lang="eu" xmlns:th="http://www.thymeleaf.org">
+<html lang="eu" 
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
 <head>
   <meta charset="UTF-8">
@@ -20,25 +22,40 @@
 <body>
 
   <!-- ── GOIKO BARRA ── -->
-  <header class="topbar">
-    <span class="logo" th:text="#{title.net}">Network Topology</span>
-    <div class="topbar-sep"></div>
-    <div class="lang-selector">
-      <button class="lang-btn" id="lang-btn">
-        <span id="lang-code" th:text="#{nav.lang}">EU</span>
-      </button>
-      <div class="lang-dropdown" id="lang-dropdown">
-        <div class="lang-option" data-lang="eu">
-          <span>Euskera</span>
-        </div>
-        <div class="lang-option" data-lang="en">
-          <span>English</span>
-        </div>
+ <header class="topbar">
+  <span class="logo" th:text="#{title.net}">Network Topology</span>
+  <div class="topbar-sep"></div>
+  
+  <!-- Hizkuntza hautatzailea -->
+  <div class="lang-selector">
+    <button class="lang-btn" id="lang-btn">
+      <span id="lang-code" th:text="#{nav.lang}">EU</span>
+    </button>
+    <div class="lang-dropdown" id="lang-dropdown">
+      <div class="lang-option" data-lang="eu">
+        <span>Euskera</span>
+      </div>
+      <div class="lang-option" data-lang="en">
+        <span>English</span>
       </div>
     </div>
-    <a href="/apps" class="nav-btn" th:text="#{nav.apps}"> Aplikazioak</a>
-    <a href="/requests" class="nav-btn" th:text="#{nav.requests}"> Requests</a>
-  </header>
+  </div>
+
+  <a href="/apps" class="nav-btn" th:text="#{nav.apps}">Aplikazioak</a>
+  <a href="/requests" class="nav-btn" th:text="#{nav.requests}">Requests</a>
+  
+  <!-- LOGOUT BOTOIA - KONPONDUTA -->
+  <div style="margin-left: auto; display: flex; align-items: center; gap: 12px;">
+    <form th:action="@{/logout}" method="post" 
+          style="margin: 0;" 
+          sec:authorize="isAuthenticated()">
+      <button type="submit" class="nav-btn" 
+              style="background: none; border: 1px solid var(--border); padding: 7px 16px;">
+         Irten
+      </button>
+    </form>
+  </div>
+</header>
 
   <main class="main">
 

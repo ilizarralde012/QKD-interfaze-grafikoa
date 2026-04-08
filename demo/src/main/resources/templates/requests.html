@@ -1,5 +1,7 @@
 <!DOCTYPE html>
-<html lang="eu" xmlns:th="http://www.thymeleaf.org">
+<html lang="eu" 
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
 <head>
   <meta charset="UTF-8">
@@ -18,9 +20,9 @@
 
   <!-- ── GOIKO BARRA ── -->
   <header class="topbar">
-    <span class="logo" th:text="#{requests.title}">Sesio eskaerak</span>
+    <span class="logo" th:text="#{title.requests}">Session Requests</span>
     <div class="topbar-sep"></div>
-
+    
     <!-- Hizkuntza hautatzailea -->
     <div class="lang-selector">
       <button class="lang-btn" id="lang-btn">
@@ -35,9 +37,22 @@
         </div>
       </div>
     </div>
-
+    
     <a href="/" class="nav-btn" th:text="#{nav.topology}">Sare Topologia</a>
     <a href="/apps" class="nav-btn" th:text="#{nav.apps}">Aplikazioak</a>
+    
+    <!-- LOGOUT BOTOIA - KONPONDUTA -->
+    <div style="margin-left: auto; display: flex; align-items: center; gap: 12px;">      
+      <!-- Logout formularioa - bakarrik autentikatuta badago -->
+      <form th:action="@{/logout}" method="post" 
+            style="margin: 0;" 
+            sec:authorize="isAuthenticated()">
+        <button type="submit" class="nav-btn" 
+                style="background: none; border: 1px solid var(--border); padding: 7px 16px;">
+          Irten
+        </button>
+      </form>
+    </div>
   </header>
 
   <!-- Layout sinplea: taula bakarrik -->

@@ -1,14 +1,24 @@
 package com.example.demo.config;
 
+import java.util.Arrays;
+
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.authentication.ProviderManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.crypto.password.NoOpPasswordEncoder;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.ldap.DefaultSpringSecurityContextSource;
+import org.springframework.security.ldap.authentication.BindAuthenticator;
+import org.springframework.security.ldap.authentication.LdapAuthenticationProvider;
+import org.springframework.security.ldap.search.FilterBasedLdapUserSearch;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
@@ -24,54 +34,78 @@ public class SecurityConfig {
     @Value("${ldap.user.search.filter}")
     private String userSearchFilter;
 
+    private final UserDetailsService databaseUserDetailsService;
+
+    public SecurityConfig(@Qualifier("databaseUserDetailsService") UserDetailsService databaseUserDetailsService) {
+        this.databaseUserDetailsService = databaseUserDetailsService;
+    }
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .authorizeHttpRequests(authorize -> authorize
-                // Publiko: login, CSS, JS, irudiak, erroreak
-                .requestMatchers("/login", "/css/**", "/js/**", "/images/**", "/error").permitAll()
-                // Gainerako guztiak autentikatu
+                .requestMatchers("/login", "/perform-login", "/css/**", "/js/**", "/images/**", "/error", "/favicon.ico").permitAll()
                 .anyRequest().authenticated()
-            )
-            .formLogin(form -> form
-                .loginPage("/login")
-                .defaultSuccessUrl("/", true)
-                .failureUrl("/login?error=true")
-                .permitAll()
             )
             .logout(logout -> logout
                 .logoutUrl("/logout")
                 .logoutSuccessUrl("/login?logout=true")
                 .invalidateHttpSession(true)
                 .deleteCookies("JSESSIONID")
+                .clearAuthentication(true)
                 .permitAll()
             )
+            .sessionManagement(session -> session
+                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+                .maximumSessions(1)
+                .maxSessionsPreventsLogin(false)
+            )
+            .exceptionHandling(ex -> ex
+                .authenticationEntryPoint((request, response, authException) -> 
+                    response.sendRedirect("/login")
+                )
+            )
             .csrf(csrf -> csrf
-                // CSRF desaktibatu API-etarako
-                .ignoringRequestMatchers("/api/**")
+                .ignoringRequestMatchers("/api/**", "/perform-login")
             );
 
         return http.build();
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
-        AuthenticationManagerBuilder authBuilder = 
-            http.getSharedObject(AuthenticationManagerBuilder.class);
-        
-        authBuilder
-            .ldapAuthentication()
-                .userSearchBase("")
-                .userSearchFilter(userSearchFilter)
-                .contextSource()
-                    .url(ldapUrl + "/" + ldapBase);
-        
-        return authBuilder.build();
+    public AuthenticationManager authenticationManager() {
+        return new ProviderManager(
+            Arrays.asList(
+                ldapAuthenticationProvider(),
+                daoAuthenticationProvider()
+            )
+        );
     }
 
     @Bean
-    @SuppressWarnings("deprecation")
+    public LdapAuthenticationProvider ldapAuthenticationProvider() {
+        BindAuthenticator bindAuthenticator = new BindAuthenticator(contextSource());
+        bindAuthenticator.setUserSearch(
+            new FilterBasedLdapUserSearch("", userSearchFilter, contextSource())
+        );
+        
+        return new LdapAuthenticationProvider(bindAuthenticator);
+    }
+
+   @Bean
+public DaoAuthenticationProvider daoAuthenticationProvider() {
+    DaoAuthenticationProvider provider = new DaoAuthenticationProvider(databaseUserDetailsService);
+    provider.setPasswordEncoder(passwordEncoder());
+    return provider;
+}
+
+    @Bean
+    public DefaultSpringSecurityContextSource contextSource() {
+        return new DefaultSpringSecurityContextSource(ldapUrl + "/" + ldapBase);
+    }
+
+    @Bean
     public PasswordEncoder passwordEncoder() {
-        return NoOpPasswordEncoder.getInstance();
+        return new BCryptPasswordEncoder();
     }
 }

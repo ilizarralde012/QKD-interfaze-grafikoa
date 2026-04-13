@@ -918,3 +918,81 @@ body.login-body {
     padding-top: 40px;
   }
 }
+/* ══════════════════════════════════════════════════════════════
+   LOGIN AUKERAKETA ESTILOAK
+   ══════════════════════════════════════════════════════════════ */
+
+.login-selection {
+  /* Defektuz */
+}
+
+.login-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 32px;
+}
+
+.login-option {
+  background: var(--panel-bg);
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  color: var(--text);
+}
+
+.login-option:hover {
+  border-color: var(--cn-color);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(37, 99, 235, 0.15);
+}
+
+.login-option-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+}
+
+.login-option-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--heading);
+  margin-bottom: 8px;
+}
+
+.login-option-desc {
+  font-size: 14px;
+  color: var(--text);
+  margin-bottom: 12px;
+}
+
+.login-option-note {
+  font-size: 12px;
+  color: var(--text-muted);
+  background: var(--bg);
+  padding: 4px 12px;
+  border-radius: 12px;
+  display: inline-block;
+}
+
+.login-back {
+  display: inline-block;
+  margin-top: 16px;
+  font-size: 14px;
+  color: var(--cn-color);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.login-back:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 640px) {
+  .login-options {
+    grid-template-columns: 1fr;
+  }
+}

@@ -50,9 +50,10 @@
           style="margin: 0;" 
           sec:authorize="isAuthenticated()">
       <button type="submit" class="nav-btn" 
-              style="background: none; border: 1px solid var(--border); padding: 7px 16px;">
-         Irten
-      </button>
+                style="background: none; border: 1px solid var(--border); padding: 7px 16px;"
+                th:text="#{nav.logout}">
+          Irten
+        </button>
     </form>
   </div>
 </header>

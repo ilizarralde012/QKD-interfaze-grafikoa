@@ -48,7 +48,8 @@
             style="margin: 0;" 
             sec:authorize="isAuthenticated()">
         <button type="submit" class="nav-btn" 
-                style="background: none; border: 1px solid var(--border); padding: 7px 16px;">
+                style="background: none; border: 1px solid var(--border); padding: 7px 16px;"
+                th:text="#{nav.logout}">
           Irten
         </button>
       </form>
@@ -120,7 +121,18 @@
 
       // L4
       l4Initiator: /*[[#{requests.detail.l4.initiator}]]*/ "Initiator",
-      l4Responder: /*[[#{requests.detail.l4.responder}]]*/ "Responder"
+      l4Responder: /*[[#{requests.detail.l4.responder}]]*/ "Responder",
+      
+      // LEGENDA - BERRIA
+      legendTitle: /*[[#{legend.title}]]*/ "TOPOLOGIA OSAGAIAK",
+      legendClassical: /*[[#{legend.classical}]]*/ "Classical Link",
+      legendQuantum: /*[[#{legend.quantum}]]*/ "Quantum Link",
+      legendKms: /*[[#{legend.kms}]]*/ "KMS",
+      legendVkms: /*[[#{legend.vkms}]]*/ "vKMS",
+      legendEndpoint: /*[[#{legend.endpoint}]]*/ "Endpoint",
+      legendQn: /*[[#{legend.qn}]]*/ "QN (Quantum)",
+      legendCn: /*[[#{legend.cn}]]*/ "CN (Classical)",
+      legendHelp: /*[[#{legend.help}]]*/ "Klikatu sesio bat xehetasunak ikusteko"
     };
   </script>
 
@@ -562,6 +574,16 @@
         .attr('font-weight', '600')
         .attr('fill', '#1a1d2e')
         .text(d => d.id);
+      
+      // Endpoint icon (giltza argazkia) - Tamaina eta kokapena doituta
+      siteGroups.append('image')
+        .attr('class', 'endpoint-icon')
+        .attr('href', '/images/endpoint-icon.png')
+        .attr('width', 36)   // Txikiagoa: 48 → 36
+        .attr('height', 36)  // Txikiagoa: 48 → 36
+        .attr('x', 25)       // Ezkerrerago: 40 → 25
+        .attr('y', -48)      // Doitu goian
+        .style('opacity', 0);
 
       // vKMS (eskuinean)
       siteGroups.append('circle')
@@ -647,45 +669,164 @@
         applyHighlights(detail, g, topology);
       }, 2000);
 
-      // Legenda gehitu
-      const legend = svg.append('g')
-        .attr('class', 'topology-legend')
+      // ========================================
+      // LEGENDA OROKORRA (goian, ezkerrean)
+      // ========================================
+      const legendGeneral = svg.append('g')
+        .attr('class', 'topology-legend-general')
         .attr('transform', 'translate(20, 20)');
-
-      // Classical link adibidea
-      legend.append('line')
+      
+      // Fondo koadroa
+      legendGeneral.append('rect')
+        .attr('x', -10)
+        .attr('y', -15)
+        .attr('width', 280)
+        .attr('height', 120)
+        .attr('fill', 'white')
+        .attr('stroke', '#d1d5db')
+        .attr('stroke-width', 1.5)
+        .attr('rx', 6)
+        .attr('opacity', 0.95);
+      
+      // Izenburua
+      legendGeneral.append('text')
+        .attr('x', 0)
+        .attr('y', 0)
+        .attr('font-size', '13px')
+        .attr('font-weight', '700')
+        .attr('fill', '#1a1d2e')
+        .text(t('legend.title'));
+      
+      // Classical Link
+      legendGeneral.append('line')
         .attr('x1', 0)
-        .attr('y1', 0)
-        .attr('x2', 40)
-        .attr('y2', 0)
+        .attr('y1', 20)
+        .attr('x2', 35)
+        .attr('y2', 20)
         .attr('stroke', '#3b82f6')
-        .attr('stroke-width', 2)
-        .attr('stroke-opacity', 0.6);
-
-      legend.append('text')
-        .attr('x', 50)
-        .attr('y', 4)
-        .attr('font-size', '12px')
-        .attr('fill', '#000')
-        .text('Classical Link');
-
-      // Quantum link adibidea
-      legend.append('line')
-        .attr('x1', 0)
-        .attr('y1', 25)
-        .attr('x2', 40)
-        .attr('y2', 25)
+        .attr('stroke-width', 2.5)
+        .attr('stroke-opacity', 0.7);
+      
+      legendGeneral.append('text')
+        .attr('x', 42)
+        .attr('y', 24)
+        .attr('font-size', '11px')
+        .attr('fill', '#374151')
+        .text(t('legend.classical'));
+      
+      // Quantum Link
+      legendGeneral.append('line')
+        .attr('x1', 145)
+        .attr('y1', 20)
+        .attr('x2', 180)
+        .attr('y2', 20)
         .attr('stroke', '#a855f7')
         .attr('stroke-width', 3)
-        .attr('stroke-opacity', 0.6)
+        .attr('stroke-opacity', 0.7)
         .attr('stroke-dasharray', '5,5');
-
-      legend.append('text')
-        .attr('x', 50)
-        .attr('y', 29)
-        .attr('font-size', '12px')
-        .attr('fill', '#000')
-        .text('Quantum Link');
+      
+      legendGeneral.append('text')
+        .attr('x', 187)
+        .attr('y', 24)
+        .attr('font-size', '11px')
+        .attr('fill', '#374151')
+        .text(t('legend.quantum'));
+      
+      // KMS node
+      legendGeneral.append('circle')
+        .attr('cx', 8)
+        .attr('cy', 45)
+        .attr('r', 7)
+        .attr('fill', '#fef3c7')
+        .attr('stroke', '#f59e0b')
+        .attr('stroke-width', 2);
+      
+      legendGeneral.append('text')
+        .attr('x', 20)
+        .attr('y', 49)
+        .attr('font-size', '11px')
+        .attr('fill', '#374151')
+        .text(t('legend.kms'));
+      
+      // vKMS node
+      legendGeneral.append('circle')
+        .attr('cx', 68)
+        .attr('cy', 45)
+        .attr('r', 7)
+        .attr('fill', '#d1fae5')
+        .attr('stroke', '#10b981')
+        .attr('stroke-width', 2);
+      
+      legendGeneral.append('text')
+        .attr('x', 80)
+        .attr('y', 49)
+        .attr('font-size', '11px')
+        .attr('fill', '#374151')
+        .text(t('legend.vkms'));
+      
+      // Endpoint icon (SVG giltza)
+      const endpointLegend = legendGeneral.append('g')
+        .attr('transform', 'translate(145, 38)');
+      
+      endpointLegend.append('circle')
+        .attr('cx', 4)
+        .attr('cy', 4)
+        .attr('r', 3)
+        .attr('fill', '#FFD700')
+        .attr('stroke', '#FFA500')
+        .attr('stroke-width', 1);
+      
+      endpointLegend.append('rect')
+        .attr('x', 6)
+        .attr('y', 2)
+        .attr('width', 4)
+        .attr('height', 2)
+        .attr('fill', '#FFD700')
+        .attr('stroke', '#FFA500')
+        .attr('stroke-width', 0.5);
+      
+      legendGeneral.append('text')
+        .attr('x', 160)
+        .attr('y', 49)
+        .attr('font-size', '11px')
+        .attr('fill', '#374151')
+        .text(t('legend.endpoint'));
+      
+      // Site motak
+      legendGeneral.append('rect')
+        .attr('x', 0)
+        .attr('y', 62)
+        .attr('width', 25)
+        .attr('height', 15)
+        .attr('fill', '#f5f3ff')
+        .attr('stroke', '#7c3aed')
+        .attr('stroke-width', 1.5)
+        .attr('rx', 3);
+      
+      legendGeneral.append('text')
+        .attr('x', 30)
+        .attr('y', 73)
+        .attr('font-size', '11px')
+        .attr('fill', '#374151')
+        .text(t('legend.qn'));
+      
+      legendGeneral.append('rect')
+        .attr('x', 145)
+        .attr('y', 62)
+        .attr('width', 25)
+        .attr('height', 15)
+        .attr('fill', '#eff6ff')
+        .attr('stroke', '#2563eb')
+        .attr('stroke-width', 1.5)
+        .attr('rx', 3);
+      
+      legendGeneral.append('text')
+        .attr('x', 175)
+        .attr('y', 73)
+        .attr('font-size', '11px')
+        .attr('fill', '#374151')
+        .text(t('legend.cn'));
+      
     }
 function resetHighlights(g) {
       // KMS nodoak
@@ -721,6 +862,14 @@ function resetHighlights(g) {
     /**
      * Lausotu elementu guztiak (parte hartzen ez dutenak)
      */
+    
+    function showEndpointIcon(g, siteId) {
+      g.selectAll('.site-group')
+        .filter(d => d.id === siteId)
+        .select('.endpoint-icon')
+        .style('opacity', 1);
+    }
+
     function dimAll(g) {
       // Nodoak lausotu
       g.selectAll('.kms-node').style('opacity', 0.15);
@@ -743,6 +892,9 @@ function resetHighlights(g) {
       
       // Kendu aurreko geziak
       g.selectAll('.mid-arrow').remove();
+      
+      // Ezkutatu endpoint icon-ak
+      g.selectAll('.endpoint-icon').style('opacity', 0);
       
       // Garbitu highlighted links array-a
       highlightedLinks = [];
@@ -792,6 +944,9 @@ function resetHighlights(g) {
             .style('opacity', 1)
             .style('filter', 'none');
           
+          // Erakutsi endpoint icon-a
+          showEndpointIcon(g, srcSite);
+          
           const dstNode = topology.nodes.find(n => n.id === kmsDst);
           if (dstNode) {
             const dstSite = dstNode.site;
@@ -802,6 +957,9 @@ function resetHighlights(g) {
               .selectAll('.site-box, .site-label')
               .style('opacity', 1)
               .style('filter', 'none');
+            
+            // Erakutsi endpoint icon-a
+            showEndpointIcon(g, dstSite);
             
             highlightQuantumLink(g, srcSite, dstSite, '#10b981');
           }
@@ -845,6 +1003,11 @@ function resetHighlights(g) {
             .selectAll('.site-box, .site-label')
             .style('opacity', 1)
             .style('filter', 'none');
+          
+          // Erakutsi endpoint icon-a lehenengo eta azken hop-etan
+          if (i === 0 || i === detail.l2Hops.length - 1) {
+            showEndpointIcon(g, node.site);
+          }
         }
       });
 
@@ -934,6 +1097,14 @@ function resetHighlights(g) {
             .style('opacity', 1);
         }
       });
+      
+      // Erakutsi endpoint icon-ak Receiver eta Passive-n
+      if (receiverSite) {
+        showEndpointIcon(g, receiverSite);
+      }
+      if (passiveSite) {
+        showEndpointIcon(g, passiveSite);
+      }
 
       // Rolak konbinatu
       const siteRoles = {};
@@ -965,6 +1136,7 @@ function resetHighlights(g) {
       }));
 
       // LOTURAK NABARMENDU
+      // Receiver → Relay classical link (MANTENDU)
       if (receiverSite && relaySite && receiverSite !== relaySite) {
         const path = findShortestPath(classicalLinks, receiverSite, relaySite);
         console.log('Receiver → Relay path:', path);
@@ -985,26 +1157,9 @@ function resetHighlights(g) {
         }
       }
 
-      if (receiverSite && passiveSite && receiverSite !== passiveSite) {
-        const path = findShortestPath(classicalLinks, receiverSite, passiveSite);
-        console.log('Receiver → Passive path:', path);
+      // ❌ KENDUTA: Receiver → Passive classical link (ez da behar)
 
-        if (path) {
-          for (let i = 0; i < path.length - 1; i++) {
-            highlightClassicalLink(g, path[i], path[i + 1], '#eab308');
-            
-            // Birgaitu bitarteko Site-ak
-            [path[i], path[i + 1]].forEach(siteId => {
-              g.selectAll('.site-group')
-                .filter(d => d.id === siteId)
-                .selectAll('.site-box, .site-label')
-                .style('opacity', 1)
-                .style('filter', 'none');
-            });
-          }
-        }
-      }
-
+      // Relay → Passive quantum link (MANTENDU)
       if (relaySite && passiveSite && relaySite !== passiveSite) {
         console.log('Relay → Passive: quantum direct');
         highlightQuantumLink(g, relaySite, passiveSite, '#10b981');
@@ -1031,6 +1186,9 @@ function resetHighlights(g) {
           .filter(function() { return d3.select(this).attr('data-site-id') === initiatorSite; })
           .style('opacity', 1);
         
+        // Erakutsi endpoint icon-a
+        showEndpointIcon(g, initiatorSite);
+        
         highlightVKMSNode(g, initiatorSite, '#3b82f6', 'Initiator');
       }
       
@@ -1046,6 +1204,9 @@ function resetHighlights(g) {
         g.selectAll('.vkms-node')
           .filter(function() { return d3.select(this).attr('data-site-id') === responderSite; })
           .style('opacity', 1);
+        
+        // Erakutsi endpoint icon-a
+        showEndpointIcon(g, responderSite);
         
         highlightVKMSNode(g, responderSite, '#10b981', 'Responder');
       }
@@ -1307,6 +1468,35 @@ function resetHighlights(g) {
           .style('filter', `drop-shadow(0 0 6px ${color})`);
       });
     }
+
+    // ========================================
+    // HIZKUNTZA SISTEMA
+    // ========================================
+    
+    // Itzulpena lortu requestsI18n objektutik
+    function t(key) {
+      // Konbertitu 'legend.title' -> 'legendTitle'
+      const camelKey = key.replace(/\./g, '').replace(/^legend/, 'legend');
+      const mappedKey = camelKey.charAt(0).toLowerCase() + camelKey.slice(1);
+      
+      // Mapak: 'legend.title' -> 'legendTitle'
+      const keyMap = {
+        'legend.title': 'legendTitle',
+        'legend.classical': 'legendClassical',
+        'legend.quantum': 'legendQuantum',
+        'legend.kms': 'legendKms',
+        'legend.vkms': 'legendVkms',
+        'legend.endpoint': 'legendEndpoint',
+        'legend.qn': 'legendQn',
+        'legend.cn': 'legendCn',
+      };
+      
+      const i18nKey = keyMap[key];
+      return window.requestsI18n?.[i18nKey] || key;
+    }
+    
+    // Hizkuntza dropdown logika languageSelector.js-k kudeatzen du dagoeneko!
+    // Ez da behar hemen bikoiztea
 
   </script>
 

@@ -12,23 +12,15 @@ public class LoginController {
     public String loginPage(
         @RequestParam(value = "error", required = false) String error,
         @RequestParam(value = "logout", required = false) String logout,
-        @RequestParam(value = "type", required = false) String type,
         Model model
     ) {
         if (error != null) {
             model.addAttribute("error", true);
+            model.addAttribute("errorMessage", "Erabiltzaile izena edo pasahitza ez dira zuzenak.");
         }
         if (logout != null) {
             model.addAttribute("logout", true);
-        }
-        
-        // Zein login mota erakutsi
-        if ("ldap".equals(type)) {
-            model.addAttribute("loginType", "ldap");
-        } else if ("db".equals(type)) {
-            model.addAttribute("loginType", "db");
-        } else {
-            model.addAttribute("showSelection", true);
+            model.addAttribute("logoutMessage", "Saioa ondo itxi duzu.");
         }
         
         return "login";

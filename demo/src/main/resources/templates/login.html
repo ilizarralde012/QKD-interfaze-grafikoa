@@ -15,102 +15,35 @@
 
   <div class="login-panel">
     
-    <!-- AUKERAKETA ORRIA -->
-    <div th:if="${showSelection}" class="login-selection">
+    <div class="login-form-container">
       <div class="login-header">
         <h1 class="login-title">Hasi saioa</h1>
-        <p class="login-subtitle">Aukeratu autentikazio mota</p>
+        <p class="login-subtitle">Sartu zure kredentzialak</p>
       </div>
 
+      <!-- LOGOUT mezua -->
       <div th:if="${logout}" class="alert alert-success">
         <span class="alert-icon">✓</span>
-        <div class="alert-content">Saioa ondo itxi duzu</div>
+        <div class="alert-content" th:text="${logoutMessage}">Saioa ondo itxi duzu</div>
       </div>
 
-      <div class="login-options">
-        <a href="/login?type=ldap" class="login-option">
-          <div class="login-option-icon">🎓</div>
-          <div class="login-option-title">EHU LDAP</div>
-          <div class="login-option-desc">EHU kredentzialak</div>
-          <div class="login-option-note">VPN beharrezkoa</div>
-        </a>
-
-        <a href="/login?type=db" class="login-option">
-          <div class="login-option-icon">👤</div>
-          <div class="login-option-title">Local</div>
-          <div class="login-option-desc">Datu-baseko erabiltzaileak</div>
-          <div class="login-option-note">Garapen/test</div>
-        </a>
-      </div>
-    </div>
-
-    <!-- LDAP LOGIN -->
-    <div th:if="${loginType == 'ldap'}" class="login-form-container">
-      <div class="login-header">
-        <h1 class="login-title">🎓 EHU LDAP Login</h1>
-        <p class="login-subtitle">Sartu zure EHU kredentzialak</p>
-      </div>
-
+      <!-- ERROR mezua -->
       <div th:if="${error}" class="alert alert-error">
         <span class="alert-icon">⚠️</span>
         <div class="alert-content">
           <strong>Autentikazio errorea</strong><br>
-          Erabiltzaile izena edo pasahitza ez dira zuzenak. Egiaztatu EHU VPN-era konektatuta zaudela.
+          <span th:text="${errorMessage}">Erabiltzaile izena edo pasahitza ez dira zuzenak.</span>
         </div>
       </div>
 
-      <form th:action="@{/perform-login}" method="post" class="login-form">
-        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-        <input type="hidden" name="login_type" value="ldap">
-        
-        <div class="form-group">
-          <label class="form-label" for="username">EHU UID</label>
-          <input type="text" id="username" name="username" class="form-input" 
-                 placeholder="LDAP erabiltzailea" required autofocus autocomplete="username">
-        </div>
-
-        <div class="form-group">
-          <label class="form-label" for="password">Pasahitza</label>
-          <input type="password" id="password" name="password" class="form-input" 
-                 placeholder="••••••••" required autocomplete="current-password">
-        </div>
-
-        <button type="submit" class="btn-primary">Sartu</button>
-      </form>
-
-      <div class="login-footer">
-        <div class="login-footer-text">EHU LDAP autentikazioa</div>
-        <div class="login-footer-hint">
-          <span class="login-hint-icon">🔒</span>
-          <span>EHU VPN konexioa beharrezkoa da</span>
-        </div>
-        <a href="/login" class="login-back">← Itzuli</a>
-      </div>
-    </div>
-
-    <!-- DATABASE LOGIN -->
-    <div th:if="${loginType == 'db'}" class="login-form-container">
-      <div class="login-header">
-        <h1 class="login-title">👤 Local Login</h1>
-        <p class="login-subtitle">Datu-baseko erabiltzaileak</p>
-      </div>
-
-      <div th:if="${error}" class="alert alert-error">
-        <span class="alert-icon">⚠️</span>
-        <div class="alert-content">
-          <strong>Autentikazio errorea</strong><br>
-          Erabiltzaile izena edo pasahitza ez dira zuzenak.
-        </div>
-      </div>
-
-      <form th:action="@{/perform-login}" method="post" class="login-form">
-        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-        <input type="hidden" name="login_type" value="db">
+      <!-- LOGIN FORM (Spring Security) -->
+      <form th:action="@{/login}" method="post" class="login-form">
         
         <div class="form-group">
           <label class="form-label" for="username">Erabiltzaile izena</label>
           <input type="text" id="username" name="username" class="form-input" 
-                 placeholder="Erabiltzaile izena" required autofocus autocomplete="username">
+                 placeholder="EHU erabiltzailea edo DB erabiltzailea" 
+                 required autofocus autocomplete="username">
         </div>
 
         <div class="form-group">
@@ -124,11 +57,26 @@
 
       <div class="login-footer">
         <div class="login-footer-hint">
-          <strong>Test erabiltzaileak:</strong><br>
-          <code>testuser</code> / <code>test123</code><br>
-          <code>demo</code> / <code>test123</code>
+          <strong>📌 Autentikazio metodoak:</strong>
+          <div style="margin-top: 8px;">
+            <div style="margin-bottom: 12px;">
+              <strong> Database </strong><br>
+              <span style="color: #6b7280; font-size: 13px;">
+                → Erabiltzailea: Datu baseko erabiltzailea<br>
+                → Pasahitza: <code>******</code><br>
+                → <strong>Ez da VPN behar</strong> 
+              </span>
+            </div>
+            <div>
+              <strong>🎓 LDAP (EHU)</strong><br>
+              <span style="color: #6b7280; font-size: 13px;">
+                → Erabiltzailea: Zure EHU erabiltzaile-kodea <br>
+                → Pasahitza: Zure EHU pasahitza<br>
+                → ⚠️ <strong>VPN konexioa beharrezkoa</strong> EHU sarean ez bazaude
+              </span>
+            </div>
+          </div>
         </div>
-        <a href="/login" class="login-back">← Itzuli</a>
       </div>
     </div>
 

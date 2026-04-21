@@ -398,6 +398,37 @@
         .attr('width', width)
         .attr('height', height);
 
+      // Definitu arrow marker gezietarako
+      const defs = svg.append('defs');
+      
+      // Gezia aurrerantz (→)
+      defs.append('marker')
+        .attr('id', 'arrowhead-green')
+        .attr('viewBox', '0 -5 10 10')
+        .attr('refX', 8)
+        .attr('refY', 0)
+        .attr('markerWidth', 10)
+        .attr('markerHeight', 10)
+        .attr('orient', 'auto')
+        .append('path')
+        .attr('d', 'M0,-5L10,0L0,5L2,0Z')
+        .attr('fill', '#10b981')
+        .attr('stroke', 'none');
+      
+      // Gezia atzerantz (←)
+      defs.append('marker')
+        .attr('id', 'arrowhead-green-reverse')
+        .attr('viewBox', '0 -5 10 10')
+        .attr('refX', 2)
+        .attr('refY', 0)
+        .attr('markerWidth', 10)
+        .attr('markerHeight', 10)
+        .attr('orient', 'auto')
+        .append('path')
+        .attr('d', 'M10,-5L0,0L10,5L8,0Z')
+        .attr('fill', '#10b981')
+        .attr('stroke', 'none');
+
       const g = svg.append('g');
 
       // Zoom
@@ -604,6 +635,9 @@
           });
 
         siteGroups.attr('transform', d => `translate(${d.x},${d.y})`);
+        
+        // Eguneratu geziak (highlight aktibo badago)
+        updateMidArrows(g);
       });
 
       // Gelditu 2 segundo ondoren
@@ -706,6 +740,12 @@ function resetHighlights(g) {
       
       g.selectAll('.quantum-link')
         .attr('stroke-opacity', 0.08);
+      
+      // Kendu aurreko geziak
+      g.selectAll('.mid-arrow').remove();
+      
+      // Garbitu highlighted links array-a
+      highlightedLinks = [];
     }
 
     function applyHighlights(detail, g, topology) {
@@ -784,7 +824,8 @@ function resetHighlights(g) {
       // Lausotu guztiak
       dimAll(g);
 
-      const colors = ['#3b82f6', '#eab308', '#10b981'];
+      // Kolore berde deigarri bakarra hop guztietarako
+      const greenColor = '#10b981';
       const labels = ['Hop 1', 'Hop 2', 'Hop 3'];
 
       detail.l2Hops.forEach((hop, i) => {
@@ -793,9 +834,8 @@ function resetHighlights(g) {
           .filter(function() { return d3.select(this).attr('data-kms-id') === hop.kmsId; })
           .style('opacity', 1);
         
-        const color = colors[i % colors.length];
         const label = labels[i] || `Hop ${i + 1}`;
-        highlightKMSNode(g, hop.kmsId, color, label);
+        highlightKMSNode(g, hop.kmsId, greenColor, label);
         
         // Birgaitu Site-a
         const node = topology.nodes.find(n => n.id === hop.kmsId);
@@ -817,8 +857,7 @@ function resetHighlights(g) {
         const dstNode = topology.nodes.find(n => n.id === dstKmsId);
 
         if (srcNode && dstNode && srcNode.site !== dstNode.site) {
-          const color = colors[i % colors.length];
-          highlightQuantumLink(g, srcNode.site, dstNode.site, color);
+          highlightQuantumLink(g, srcNode.site, dstNode.site, greenColor);
         }
       }
     }
@@ -1153,16 +1192,60 @@ function resetHighlights(g) {
     }
 
     // Quantum link nabarmendu
+    // Global aldagaia highlighted links gordetzeko
+    let highlightedLinks = [];
+    
+    function updateMidArrows(g) {
+      // Geziak kendu
+      g.selectAll('.mid-arrow').remove();
+      
+      // Berriro sortu highlighted bakoitzerako
+      highlightedLinks.forEach(linkInfo => {
+        // Bilatu path-a source eta target-en bidez
+        const pathElem = g.selectAll('.quantum-link')
+          .filter(function() {
+            const data = d3.select(this).datum();
+            const srcId = typeof data.source === 'object' ? data.source.id : data.source;
+            const tgtId = typeof data.target === 'object' ? data.target.id : data.target;
+            
+            return (srcId === linkInfo.srcId && tgtId === linkInfo.tgtId) ||
+                   (srcId === linkInfo.tgtId && tgtId === linkInfo.srcId);
+          });
+        
+        if (pathElem.empty()) return;
+        
+        const pathNode = pathElem.node();
+        const pathLength = pathNode.getTotalLength();
+        const midPoint = pathNode.getPointAtLength(pathLength * 0.5);
+        
+        // Kalkulatu angelua erdialdean
+        const beforeMid = pathNode.getPointAtLength(pathLength * 0.48);
+        const afterMid = pathNode.getPointAtLength(pathLength * 0.52);
+        const angle = Math.atan2(afterMid.y - beforeMid.y, afterMid.x - beforeMid.x) * 180 / Math.PI;
+        
+        // Sortu gezia (HANDIAGOA)
+        const arrowGroup = g.append('g')
+          .attr('class', 'mid-arrow')
+          .attr('transform', `translate(${midPoint.x},${midPoint.y}) rotate(${angle})`);
+        
+        arrowGroup.append('path')
+          .attr('d', linkInfo.isForward ? 'M-12,-9L12,0L-12,9L-6,0Z' : 'M12,-9L-12,0L12,9L6,0Z')
+          .attr('fill', linkInfo.color)
+          .attr('stroke', linkInfo.color)
+          .attr('stroke-width', 1)
+          .style('filter', `drop-shadow(0 0 6px ${linkInfo.color})`);
+      });
+    }
+
     function highlightQuantumLink(g, sourceSite, targetSite, color) {
       console.log('=== highlightQuantumLink DEBUG ===');
-      console.log('Looking for:', sourceSite, '↔', targetSite);
+      console.log('Looking for:', sourceSite, '→', targetSite);
 
       const matched = g.selectAll('.quantum-link')
         .filter(function () {
           const path = d3.select(this);
           const data = path.datum();
 
-          // D3-k source/target objektu bihur ditzake
           const srcId = typeof data.source === 'object' ? data.source.id : data.source;
           const tgtId = typeof data.target === 'object' ? data.target.id : data.target;
 
@@ -1174,11 +1257,55 @@ function resetHighlights(g) {
 
       console.log('Matched quantum links:', matched.size());
 
-      matched
-        .attr('stroke', color)
-        .attr('stroke-width', 7)
-        .attr('stroke-opacity', 0.9)
-        .style('filter', `drop-shadow(0 0 10px ${color}99)`);
+      matched.each(function(d, i) {
+        const pathElem = d3.select(this);
+        const data = pathElem.datum();
+        
+        const srcId = typeof data.source === 'object' ? data.source.id : data.source;
+        const tgtId = typeof data.target === 'object' ? data.target.id : data.target;
+        
+        // Nabarmendu jatorrizko kurba
+        pathElem
+          .attr('stroke', color)
+          .attr('stroke-width', 6)
+          .attr('stroke-opacity', 0.9)
+          .attr('stroke-dasharray', null)
+          .style('filter', `drop-shadow(0 0 8px ${color})`);
+        
+        // Zehaztu norabidea
+        const isForward = (srcId === sourceSite && tgtId === targetSite);
+        
+        // Gorde informazioa geroago geziak eguneratzeko
+        highlightedLinks.push({
+          srcId: srcId,
+          tgtId: tgtId,
+          color: color,
+          isForward: isForward
+        });
+        
+        // Sortu hasierako gezia (HANDIAGOA)
+        const pathNode = pathElem.node();
+        const pathLength = pathNode.getTotalLength();
+        const midPoint = pathNode.getPointAtLength(pathLength * 0.5);
+        
+        // Kalkulatu angelua erdialdean
+        const beforeMid = pathNode.getPointAtLength(pathLength * 0.48);
+        const afterMid = pathNode.getPointAtLength(pathLength * 0.52);
+        const angle = Math.atan2(afterMid.y - beforeMid.y, afterMid.x - beforeMid.x) * 180 / Math.PI;
+        
+        // Sortu gezia erdialdean
+        const arrowGroup = g.append('g')
+          .attr('class', 'mid-arrow')
+          .attr('transform', `translate(${midPoint.x},${midPoint.y}) rotate(${angle})`);
+        
+        // Gezia triangelua
+        arrowGroup.append('path')
+          .attr('d', isForward ? 'M-12,-9L12,0L-12,9L-6,0Z' : 'M12,-9L-12,0L12,9L6,0Z')
+          .attr('fill', color)
+          .attr('stroke', color)
+          .attr('stroke-width', 1)
+          .style('filter', `drop-shadow(0 0 6px ${color})`);
+      });
     }
 
   </script>

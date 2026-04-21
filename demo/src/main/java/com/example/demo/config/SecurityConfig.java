@@ -44,8 +44,29 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .authorizeHttpRequests(authorize -> authorize
-                .requestMatchers("/login", "/perform-login", "/css/**", "/js/**", "/images/**", "/error", "/favicon.ico").permitAll()
+                .requestMatchers("/login", "/css/**", "/js/**", "/images/**", "/error", "/favicon.ico").permitAll()
                 .anyRequest().authenticated()
+            )
+            .formLogin(form -> form
+                .loginPage("/login")
+                .loginProcessingUrl("/login")  // POST /login prozesatu
+                .usernameParameter("username")
+                .passwordParameter("password")
+                .defaultSuccessUrl("/", true)
+                .failureHandler((request, response, exception) -> {
+                    // Log egin errorea
+                    System.err.println("=== AUTHENTICATION FAILURE ===");
+                    System.err.println("Exception: " + exception.getClass().getName());
+                    System.err.println("Message: " + exception.getMessage());
+                    if (exception.getCause() != null) {
+                        System.err.println("Cause: " + exception.getCause().getMessage());
+                    }
+                    exception.printStackTrace();
+                    
+                    // Birbideratu login-era
+                    response.sendRedirect("/login?error=true");
+                })
+                .permitAll()
             )
             .logout(logout -> logout
                 .logoutUrl("/logout")
@@ -66,8 +87,10 @@ public class SecurityConfig {
                 )
             )
             .csrf(csrf -> csrf
-                .ignoringRequestMatchers("/api/**", "/perform-login")
-            );
+                .ignoringRequestMatchers("/api/**")
+            )
+            // GAKOA: Gehitu AuthenticationManager-a HTTP security-ra
+            .authenticationManager(authenticationManager());
 
         return http.build();
     }
@@ -76,8 +99,8 @@ public class SecurityConfig {
     public AuthenticationManager authenticationManager() {
         return new ProviderManager(
             Arrays.asList(
-                ldapAuthenticationProvider(),
-                daoAuthenticationProvider()
+                daoAuthenticationProvider(),
+                ldapAuthenticationProvider()                
             )
         );
     }
@@ -101,7 +124,16 @@ public DaoAuthenticationProvider daoAuthenticationProvider() {
 
     @Bean
     public DefaultSpringSecurityContextSource contextSource() {
-        return new DefaultSpringSecurityContextSource(ldapUrl + "/" + ldapBase);
+        DefaultSpringSecurityContextSource contextSource = 
+        new DefaultSpringSecurityContextSource(ldapUrl + "/" + ldapBase);
+    
+    // Timeout konfigurazioa (VPN-rik ez badago azkarrago huts egiteko)
+    java.util.Hashtable<String, Object> baseEnv = new java.util.Hashtable<>();
+    baseEnv.put("com.sun.jndi.ldap.connect.timeout", "3000");  // 3 segundo
+    baseEnv.put("com.sun.jndi.ldap.read.timeout", "3000");     // 3 segundo
+    contextSource.setBaseEnvironmentProperties(baseEnv);
+    
+    return contextSource;
     }
 
     @Bean

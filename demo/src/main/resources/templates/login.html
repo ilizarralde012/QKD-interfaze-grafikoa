@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login - Network Topology</title>
+  <title th:text="#{login.title}">Login - Network Topology</title>
   
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css">
@@ -11,28 +11,45 @@
 
 <body class="login-body">
   
-  <div class="login-brand">Network Topology</div>
+  <!-- HIZKUNTZA AUKERATZAILEA (goiko eskuinean) -->
+  <div style="position: fixed; top: 20px; right: 20px; z-index: 1000;">
+    <div class="lang-selector">
+      <button class="lang-btn" id="lang-btn">
+        <span id="lang-code" th:text="#{nav.lang}">EU</span>
+      </button>
+      <div class="lang-dropdown" id="lang-dropdown">
+        <div class="lang-option" data-lang="eu">
+          <span>Euskera</span>
+        </div>
+        <div class="lang-option" data-lang="en">
+          <span>English</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="login-brand" th:text="#{login.brand}">Network Topology</div>
 
   <div class="login-panel">
     
     <div class="login-form-container">
       <div class="login-header">
-        <h1 class="login-title">Hasi saioa</h1>
-        <p class="login-subtitle">Sartu zure kredentzialak</p>
+        <h1 class="login-title" th:text="#{login.header}">Hasi saioa</h1>
+        <p class="login-subtitle" th:text="#{login.subtitle}">Sartu zure kredentzialak</p>
       </div>
 
       <!-- LOGOUT mezua -->
       <div th:if="${logout}" class="alert alert-success">
         <span class="alert-icon">✓</span>
-        <div class="alert-content" th:text="${logoutMessage}">Saioa ondo itxi duzu</div>
+        <div class="alert-content" th:text="#{login.logoutSuccess}">Saioa ondo itxi duzu</div>
       </div>
 
       <!-- ERROR mezua -->
       <div th:if="${error}" class="alert alert-error">
         <span class="alert-icon">⚠️</span>
         <div class="alert-content">
-          <strong>Autentikazio errorea</strong><br>
-          <span th:text="${errorMessage}">Erabiltzaile izena edo pasahitza ez dira zuzenak.</span>
+          <strong th:text="#{login.errorTitle}">Autentikazio errorea</strong><br>
+          <span th:text="${errorMessage} ?: #{login.errorMessage}">Erabiltzaile izena edo pasahitza ez dira zuzenak.</span>
         </div>
       </div>
 
@@ -40,39 +57,40 @@
       <form th:action="@{/login}" method="post" class="login-form">
         
         <div class="form-group">
-          <label class="form-label" for="username">Erabiltzaile izena</label>
+          <label class="form-label" for="username" th:text="#{login.username}">Erabiltzaile izena</label>
           <input type="text" id="username" name="username" class="form-input" 
+                 th:placeholder="#{login.usernamePlaceholder}"
                  placeholder="EHU erabiltzailea edo DB erabiltzailea" 
                  required autofocus autocomplete="username">
         </div>
 
         <div class="form-group">
-          <label class="form-label" for="password">Pasahitza</label>
+          <label class="form-label" for="password" th:text="#{login.password}">Pasahitza</label>
           <input type="password" id="password" name="password" class="form-input" 
                  placeholder="••••••••" required autocomplete="current-password">
         </div>
 
-        <button type="submit" class="btn-primary">Sartu</button>
+        <button type="submit" class="btn-primary" th:text="#{login.submit}">Sartu</button>
       </form>
 
       <div class="login-footer">
         <div class="login-footer-hint">
-          <strong>📌 Autentikazio metodoak:</strong>
+          📌<strong th:text="#{login.authMethods}">Autentikazio metodoak:</strong>
           <div style="margin-top: 8px;">
             <div style="margin-bottom: 12px;">
-              <strong> Database </strong><br>
+              <strong th:text="#{login.dbMethod}">Database</strong><br>
               <span style="color: #6b7280; font-size: 13px;">
-                → Erabiltzailea: Datu baseko erabiltzailea<br>
-                → Pasahitza: <code>******</code><br>
-                → <strong>Ez da VPN behar</strong> 
+                → <span th:text="#{login.dbUser}">Erabiltzailea: Datu baseko erabiltzailea</span><br>
+                → <span th:text="#{login.dbPassword}">Pasahitza: ******</span><br>
+                → <strong th:text="#{login.dbNoVpn}">Ez da VPN behar</strong> 
               </span>
             </div>
             <div>
-              <strong>🎓 LDAP (EHU)</strong><br>
+              🎓<strong th:text="#{login.ldapMethod}">LDAP (EHU)</strong><br>
               <span style="color: #6b7280; font-size: 13px;">
-                → Erabiltzailea: Zure EHU erabiltzaile-kodea <br>
-                → Pasahitza: Zure EHU pasahitza<br>
-                → ⚠️ <strong>VPN konexioa beharrezkoa</strong> EHU sarean ez bazaude
+                → <span th:text="#{login.ldapUser}">Erabiltzailea: Zure EHU erabiltzaile-kodea</span><br>
+                → <span th:text="#{login.ldapPassword}">Pasahitza: Zure EHU pasahitza</span><br>
+                → ⚠️ <strong th:text="#{login.ldapVpn}">VPN konexioa beharrezkoa</strong> <span th:text="#{login.ldapVpnNote}">EHU sarean ez bazaude</span>
               </span>
             </div>
           </div>
@@ -81,6 +99,11 @@
     </div>
 
   </div>
+
+  <script type="module">
+    import { initLanguageSelector } from '/js/languageSelector.js';
+    initLanguageSelector('login');
+  </script>
 
 </body>
 </html>

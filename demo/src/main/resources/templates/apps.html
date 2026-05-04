@@ -1,127 +1,184 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="eu" 
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+ 
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Aplikazioak - Network Topology</title>
-
+ 
   <!-- Google-ko letrak -->
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
+ 
   <link rel="stylesheet" href="/css/style.css">
 </head>
+ 
 <body>
-
+ 
   <!-- ── GOIKO BARRA ── -->
   <header class="topbar">
-    <span class="logo">Registered Applications</span>
+    <span class="logo" th:text="#{title.apps}">Registered Applications</span>
     <div class="topbar-sep"></div>
-    <a href="/"         class="nav-btn"><span class="nav-btn-icon">◎</span> See network topology</a>
-    <a href="/requests" class="nav-btn"><span class="nav-btn-icon">↔</span> See requests</a>
+    
+    <!-- Hizkuntza hautatzailea -->
+    <div class="lang-selector">
+      <button class="lang-btn" id="lang-btn">
+        <span id="lang-code" th:text="#{nav.lang}">EU</span>
+      </button>
+      <div class="lang-dropdown" id="lang-dropdown">
+        <div class="lang-option" data-lang="eu">
+          <span>Euskera</span>
+        </div>
+        <div class="lang-option" data-lang="en">
+          <span>English</span>
+        </div>
+      </div>
+    </div>
+    
+    <a href="/" class="nav-btn" th:text="#{nav.topology}">Sare Topologia</a>
+    <a href="/requests" class="nav-btn" th:text="#{nav.requests}">Sesio eskaerak</a>
+    
+    <!-- LOGOUT BOTOIA - KONPONDUTA -->
+    <div style="margin-left: auto; display: flex; align-items: center; gap: 12px;">
+      <!-- Logout formularioa - bakarrik autentikatuta badago -->
+      <form th:action="@{/logout}" method="post" 
+            style="margin: 0;" 
+            sec:authorize="isAuthenticated()">
+        <button type="submit" class="nav-btn" 
+                style="background: none; border: 1px solid var(--border); padding: 7px 16px;"
+                th:text="#{nav.logout}">
+          Irten
+        </button>
+      </form>
+    </div>
   </header>
 
   <!-- Taula -->
   <main class="apps-main">
-    <h1>Aplikazioak</h1>
-    
+    <h1 th:text="#{apps.title}">Aplikazioak</h1>
+
     <!-- Taularen edukiontzia -->
-<div class="table-container">
-  
-  <!-- Izenburu eta kontagailu goiburua -->
-  <div class="table-header">
-    <h2>Zerrenda</h2>
-    <div class="app-count">
-      <span id="app-count-number">—</span> aplikazio
+    <div class="table-container">
+
+      <!-- Izenburu eta kontagailu goiburua -->
+      <div class="table-header">
+        <h2 th:text="#{apps.list}">Zerrenda</h2>
+        <div class="app-count">
+          <span id="app-count-number">—</span>
+          <span th:text="#{apps.count.suffix}">aplikazio</span>
+        </div>
+      </div>
+
+      <!-- Taula -->
+      <table class="apps-table">
+        <thead>
+          <tr>
+            <th th:text="#{apps.table.id}">ID</th>
+            <th th:text="#{apps.table.site}">Site</th>
+            <th th:text="#{apps.table.vkms}">vKMS</th>
+            <th th:text="#{apps.table.requests}">Eskaerak</th>
+          </tr>
+        </thead>
+        <tbody id="apps-table-body">
+          <tr class="loading-row">
+            <td colspan="4" th:text="#{apps.loading}">Datuak kargatzen...</td>
+          </tr>
+        </tbody>
+      </table>
+
     </div>
-  </div>
 
-  <!-- Taula -->
-  <table class="apps-table">
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>Site</th>
-        <th>vKMS</th>
-        <th>Requests</th>
-      </tr>
-    </thead>
-    <tbody id="apps-table-body">
-      <!-- JavaScript-ekin betetzen da beste guztia -->
-      <tr class="loading-row">
-        <td colspan="4">Datuak kargatzen...</td>
-      </tr>
-    </tbody>
-  </table>
-
-</div>
-    
   </main>
-<script>
+  <script type="module">
+  import { initLanguageSelector } from '/js/languageSelector.js';
+  initLanguageSelector('apps');
+</script>
 
-// Orrialdea kargatzean, datuak eskatu
-window.addEventListener('load', () => {
-  loadApps();
-});
+  <script th:inline="javascript">
+    window.appsI18n = {
+      empty: /*[[#{apps.empty}]]*/ "Ez dago aplikaziorik erregistratuta",
+      error: /*[[#{apps.error}]]*/ "Errorea datuak kargatzean"
+    };
+  </script>
 
-/**
- * API-tik app guztiak kargatu eta taulan erakutsi
- */
-function loadApps() {
-  fetch('/api/apps')
-    .then(response => {
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      return response.json();
-    })
-    .then(apps => {
-      renderAppsTable(apps);
-      updateAppCount(apps.length);
-    })
-    .catch(error => {
-      console.error('Errorea aplikazioak kargatzean:', error);
-      showError();
+  <script>
+    // Orrialdea kargatzean, datuak eskatu
+    window.addEventListener('load', () => {
+      loadApps();
     });
-}
 
- // App-en zerrenda taulan bistaratu
- 
-function renderAppsTable(apps) {
-  const tbody = document.getElementById('apps-table-body');
-  
-  // Taularen edukina garbitu (loading mezua kendu)
-  tbody.innerHTML = '';
-  
-  // App bakoitzeko errenkada bat sortu
-  apps.forEach(app => {
-    const row = document.createElement('tr');
-    
-    row.innerHTML = `
+    /**
+     * API-tik app guztiak kargatu eta taulan erakutsi
+     */
+    function loadApps() {
+      fetch('/api/apps')
+        .then(response => {
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          return response.json();
+        })
+        .then(apps => {
+          renderAppsTable(apps);
+          updateAppCount(apps.length);
+        })
+        .catch(error => {
+          console.error('Errorea aplikazioak kargatzean:', error);
+          showError();
+        });
+    }
+
+    // App-en zerrenda taulan bistaratu
+
+    function renderAppsTable(apps) {
+      const tbody = document.getElementById('apps-table-body');
+
+      // Taularen edukina garbitu (loading mezua kendu)
+      tbody.innerHTML = '';
+
+      if (apps.length === 0) {
+        tbody.innerHTML = `
+      <tr class="loading-row">
+        <td colspan="4">${window.appsI18n.empty}</td>
+      </tr>
+    `;
+        return;
+      }
+
+      // App bakoitzeko errenkada bat sortu
+      apps.forEach(app => {
+        const row = document.createElement('tr');
+
+        row.innerHTML = `
       <td>${app.id}</td>
       <td>${app.siteId || '—'}</td>
       <td>${app.vkmsId || '—'}</td>
       <td>${app.requestCount}</td>
     `;
-    
-    tbody.appendChild(row);
-  });
-}
 
- // App kopurua eguneratu goiburuan
+        tbody.appendChild(row);
+      });
+    }
 
-function updateAppCount(count) {
-  document.getElementById('app-count-number').textContent = count;
-}
+    // App kopurua eguneratu goiburuan
 
- // Errore mezua erakutsi datuen karga huts egiten badu
+    function updateAppCount(count) {
+      document.getElementById('app-count-number').textContent = count;
+    }
 
-function showError() {
-  const tbody = document.getElementById('apps-table-body');
-  tbody.innerHTML = `
+    // Errore mezua erakutsi datuen karga huts egiten badu
+
+    function showError() {
+      const tbody = document.getElementById('apps-table-body');
+      tbody.innerHTML = `
     <tr class="loading-row">
-      <td colspan="4">Errorea datuak kargatzean</td>
+      <td colspan="4">${window.appsI18n.error}</td>
     </tr>
   `;
-}
+    }
 
-</script>
+  </script>
 </body>
+
 </html>

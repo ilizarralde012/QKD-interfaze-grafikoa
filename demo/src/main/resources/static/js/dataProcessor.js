@@ -1,21 +1,19 @@
 /*
 ══════════════════════════════════════════════════════════════════
 dataProcessor.js
-──────────────────────────────────────────────────────────────────
-Funtzio bakarra du: processData(raw). Datuak D3rako prestatzen ditu, JSON fitxategitik. Bakarrik behar den formatua lortu.
-Exportatutako funtzioa: processData(raw) → { visibleNodes, classicalLinks, quantumLinks, kmsBySite }
+JSON fitxategiko datuak D3 graforako prestatzen ditu.
 ══════════════════════════════════════════════════════════════════
 */
 
 /**
- * 
+ * Datuak prozesatu eta D3rako formateatu
  *
- * @param {Object} raw - 
+ * @param {Object} raw - JSON fitxategiko datu gordinak
  * @returns {{
  *   visibleNodes:    Array,   - Bakarrik CN eta QN (KMS gabe)
  *   classicalLinks:  Array,   - Lotura klasikoak
  *   quantumLinks:    Array,   - Lotura kuantikoak (Siteetara mapeatuta)
- *   kmsBySite:       Object   - Site bakoitzeko KMSen zerrenda, panelerako 
+ *   kmsBySite:       Object   - Site bakoitzeko KMSen zerrenda
  * }}
  */
 export function processData(raw) {

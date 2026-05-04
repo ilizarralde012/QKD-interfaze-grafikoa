@@ -15,8 +15,8 @@ const panelBody = document.getElementById('panel-body');
  * QN bada, bere KMSak erakusten ditu.
  * Beti bilatzen du BDn sitearekin lotutako aplikazioak.
  *
- * @param {Object} node      - Datos del nodo seleccionado
- * @param {Object} kmsBySite - Mapa site → array de KMS
+ * @param {Object} node      - Hautatutako nodoaren datuak
+ * @param {Object} kmsBySite - Site bakoitzaren KMS array-a
  */
 export function showNodePanel(node, kmsBySite) {
   const isQN = node.node_type === 'QN';
@@ -39,15 +39,15 @@ export function showNodePanel(node, kmsBySite) {
   // Zerbitzariaren erantzuna iristen denean betetzen dira aplikazioak.
   panelBody.innerHTML = `
     <span class="type-badge ${isQN ? 'badge-qn' : 'badge-cn'}">
-      ${isQN ? 'Nodo kuantikoa' : 'Nodo klasikoa'}
+      ${isQN ? i18n.node.quantum : i18n.node.classical}
     </span>
     <div class="info-title">${node.id}</div>
-    <div class="section-label">Ezaugarriak</div>
+    <div class="section-label">${i18n.sections.features}</div>
     <table class="info-table">${rows}</table>
     ${kmsHtml}
-    <div class="section-label">Aplikazioak</div>
+    <div class="section-label">${i18n.sections.apps}</div>
     <div id="apps-container">
-      <div class="apps-loading">Aplikazioak kargatzen…</div>
+      <div class="apps-loading">${i18n.apps.loading}</div>
     </div>
   `;
 
@@ -72,20 +72,20 @@ export function showLinkPanel(link) {
 
   // Lotura kuantikoek KMS informazio gehigarria erakutsi
   const kmsRows = isQuantum ? `
-    <tr><td>Jatorrizko KMS-a</td><td>${link.kms_source || '—'}</td></tr>
-    <tr><td>Helmuga KMS-a</td><td>${link.kms_target || '—'}</td></tr>
+    <tr><td>${i18n.link.kmsSource}</td><td>${link.kms_source || '—'}</td></tr>
+<tr><td>${i18n.link.kmsTarget}</td><td>${link.kms_target || '—'}</td></tr>
   ` : '';
 
   panelBody.innerHTML = `
     <span class="type-badge ${isQuantum ? 'badge-ql' : 'badge-cl'}">
-      Lotura ${isQuantum ? 'Kuantikoa' : 'Klasikoa'}
+      Lotura ${isQuantum ? i18n.link.quantum : i18n.link.classical}
     </span>
     <div class="info-title">${srcId} ↔ ${tgtId}</div>
-    <div class="section-label">Ezaugarriak</div>
+    <div class="section-label">${i18n.sections.features}</div>
     <table class="info-table">
-      <tr><td>Jatorria</td><td>${srcId}</td></tr>
-      <tr><td>Helmuga</td><td>${tgtId}</td></tr>
-      <tr><td>Mota</td><td>${isQuantum ? 'Kuantikoa' : 'Klasikoa'}</td></tr>
+      <tr><td>${i18n.link.source}</td><td>${srcId}</td></tr>
+<tr><td>${i18n.link.target}</td><td>${tgtId}</td></tr>
+<tr><td>${i18n.link.type}</td><td>${isQuantum ? i18n.link.quantum : i18n.link.classical}</td></tr>
       ${kmsRows}
     </table>
   `;
@@ -100,9 +100,9 @@ export function clearPanel() {
   panelBody.innerHTML = `
     <div class="empty-state">
       <div class="empty-icon">◎</div>
-      <div class="empty-text">Ez dago ezer hautatuta</div>
+      <div class="empty-text">${i18n.empty.nothingSelected}</div>
       <div class="empty-hint">
-        Klik egin nodo batean<br>edo lotura batean<br>dituzten propietateak ikusteko
+        ${i18n.empty.clickHint}
       </div>
     </div>
   `;
@@ -144,7 +144,7 @@ function _buildKmsCards(isQN, site, kmsBySite) {
     </div>
   `).join(''); // Array guztia string bakar batean batu
 
-  return `<div class="section-label">Barneko KMS-ak</div>${cards}`;
+  return `<div class="section-label">${i18n.sections.kms}</div>${cards}`;
 }
 
 /**
@@ -168,7 +168,7 @@ function _fetchApps(siteId) {
       
       // Ez badago appik, mezu bat erakutsi
       if (apps.length === 0) {
-        container.innerHTML = `<div class="apps-empty">Aplikaziorik ez dago erregistratuta</div>`;
+        container.innerHTML = `<div class="apps-empty">${i18n.apps.none}</div>`;
         return;
       }
 
@@ -187,7 +187,7 @@ function _fetchApps(siteId) {
       console.error('Errorea aplikazioak kargatzean:', err);
       const container = document.getElementById('apps-container');
       if (container) {
-        container.innerHTML = `<div class="apps-empty">Errorea aplikazioak kargatzean</div>`;
+        container.innerHTML = `<div class="apps-empty">${i18n.apps.error}</div>`;
       }
     });
 }

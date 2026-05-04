@@ -1,27 +1,62 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="eu" 
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Network Topology</title>
 
   <!-- Google-ko letrak -->
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
 
   <!-- D3 liburutegia CDNtik -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
 
   <link rel="stylesheet" href="/css/style.css">
 </head>
+
 <body>
 
   <!-- ── GOIKO BARRA ── -->
-  <header class="topbar">
-    <span class="logo">Network Topology</span>
-    <div class="topbar-sep"></div>
-    <a href="/apps"     class="nav-btn"><span class="nav-btn-icon">⊞</span>See Apps</a>
-    <a href="/requests" class="nav-btn"><span class="nav-btn-icon">↔</span>See Requests</a>
-  </header>
+ <header class="topbar">
+  <span class="logo" th:text="#{title.net}">Network Topology</span>
+  <div class="topbar-sep"></div>
+  
+  <!-- Hizkuntza hautatzailea -->
+  <div class="lang-selector">
+    <button class="lang-btn" id="lang-btn">
+      <span id="lang-code" th:text="#{nav.lang}">EU</span>
+    </button>
+    <div class="lang-dropdown" id="lang-dropdown">
+      <div class="lang-option" data-lang="eu">
+        <span>Euskera</span>
+      </div>
+      <div class="lang-option" data-lang="en">
+        <span>English</span>
+      </div>
+    </div>
+  </div>
+
+  <a href="/apps" class="nav-btn" th:text="#{nav.apps}">Aplikazioak</a>
+  <a href="/requests" class="nav-btn" th:text="#{nav.requests}">Requests</a>
+  
+  <!-- LOGOUT BOTOIA - KONPONDUTA -->
+  <div style="margin-left: auto; display: flex; align-items: center; gap: 12px;">
+    <form th:action="@{/logout}" method="post" 
+          style="margin: 0;" 
+          sec:authorize="isAuthenticated()">
+      <button type="submit" class="nav-btn" 
+                style="background: none; border: 1px solid var(--border); padding: 7px 16px;"
+                th:text="#{nav.logout}">
+          Irten
+        </button>
+    </form>
+  </div>
+</header>
 
   <main class="main">
 
@@ -31,30 +66,33 @@
 
       <!-- Aurkibidea -->
       <div class="legend">
-        <div class="legend-title">Nodo motak</div>
+        <div class="legend-title" th:text="#{legend.nodeTypes}">Nodo motak</div>
         <div class="legend-row">
           <svg class="legend-icon" viewBox="0 0 26 26">
-            <circle cx="13" cy="13" r="11" fill="var(--cn-bg)" stroke="var(--cn-color)" stroke-width="1.8"/>
-            <text x="13" y="17" text-anchor="middle" font-size="10" fill="var(--cn-color)" font-family="DM Mono">C</text>
+            <circle cx="13" cy="13" r="11" fill="var(--cn-bg)" stroke="var(--cn-color)" stroke-width="1.8" />
+            <text x="13" y="17" text-anchor="middle" font-size="10" fill="var(--cn-color)"
+              font-family="DM Mono">C</text>
           </svg>
-          Nodo klasikoa
+          <span th:text="#{legend.classicalNode}">Nodo klasikoa</span>
         </div>
         <div class="legend-row">
           <svg class="legend-icon" viewBox="0 0 26 26">
-            <rect x="2" y="2" width="22" height="22" rx="4" fill="var(--qn-bg)" stroke="var(--qn-color)" stroke-width="1.8"/>
-            <text x="13" y="17" text-anchor="middle" font-size="10" fill="var(--qn-color)" font-family="DM Mono">Q</text>
+            <rect x="2" y="2" width="22" height="22" rx="4" fill="var(--qn-bg)" stroke="var(--qn-color)"
+              stroke-width="1.8" />
+            <text x="13" y="17" text-anchor="middle" font-size="10" fill="var(--qn-color)"
+              font-family="DM Mono">Q</text>
           </svg>
-          Nodo kuantikoa
+          <span th:text="#{legend.quantumNode}">Nodo kuantikoa</span>
         </div>
         <div class="legend-sep"></div>
-        <div class="legend-title">Lotura motak</div>
+        <div class="legend-title" th:text="#{legend.linkTypes}">Lotura motak</div>
         <div class="legend-row">
           <div class="legend-line" style="background: var(--cl-color)"></div>
-          Lotura klasikoa
+          <span th:text="#{legend.classicalLink}">Lotura klasikoa</span>
         </div>
         <div class="legend-row">
           <div class="legend-dashed"></div>
-          Lotura kuantikoa
+          <span th:text="#{legend.quantumLink}">Lotura kuantikoa</span>
         </div>
       </div>
     </div>
@@ -64,7 +102,7 @@
 
       <div class="panel-header">
         <div class="panel-dot" id="panel-dot"></div>
-        Informazioa
+        <span th:text="#{panel.info}">Informazioa</span>
       </div>
 
       <!-- Estatistikak -->
@@ -72,28 +110,28 @@
         <div class="stat-cell">
           <div class="stat-label">
             <div class="stat-dot" style="background: var(--cn-color)"></div>
-            Nodo klasiko kopurua:
+            <span th:text="#{stats.cnLabel}">Nodo klasiko kopurua:</span>
           </div>
           <div class="stat-number" id="stat-cn">—</div>
         </div>
         <div class="stat-cell">
           <div class="stat-label">
             <div class="stat-dot" style="background: var(--qn-color)"></div>
-            Nodo kuantiko kopurua:
+            <span th:text="#{stats.qnLabel}">Nodo kuantiko kopurua:</span>
           </div>
           <div class="stat-number" id="stat-qn">—</div>
         </div>
         <div class="stat-cell">
           <div class="stat-label">
             <div class="stat-dot" style="background: var(--cl-color)"></div>
-            Lotura klasiko kopurua:
+            <span th:text="#{stats.clLabel}">Lotura klasiko kopurua:</span>
           </div>
           <div class="stat-number" id="stat-cl">—</div>
         </div>
         <div class="stat-cell">
           <div class="stat-label">
             <div class="stat-dot" style="background: var(--ql-color)"></div>
-            Lotura kuantiko kopurua:
+            <span th:text="#{stats.qlLabel}">Lotura kuantiko kopurua:</span>
           </div>
           <div class="stat-number" id="stat-ql">—</div>
         </div>
@@ -104,7 +142,43 @@
 
     </aside>
   </main>
-  <script type="module" src="/js/main.js"></script>
 
+  <script type="module">
+  import { initLanguageSelector } from '/js/languageSelector.js';
+  initLanguageSelector(''); // Index orria da, path hutsa
+</script>
+  <script th:inline="javascript">
+    window.i18n = {
+      node: {
+        classical: /*[[#{panel.node.classical}]]*/ "Nodo klasikoa",
+        quantum:   /*[[#{panel.node.quantum}]]*/   "Nodo kuantikoa"
+      },
+      link: {
+        classical: /*[[#{panel.link.classical}]]*/ "Klasikoa",
+        quantum:   /*[[#{panel.link.quantum}]]*/   "Kuantikoa",
+        source:    /*[[#{panel.link.source}]]*/   "Jatorria",
+        target:    /*[[#{panel.link.target}]]*/   "Helmuga",
+        type:      /*[[#{panel.link.type}]]*/     "Mota",
+        kmsSource: /*[[#{panel.link.kmsSource}]]*/ "Jatorrizko KMS-a",
+        kmsTarget: /*[[#{panel.link.kmsTarget}]]*/ "Helmuga KMS-a"
+      },
+      sections: {
+        features:  /*[[#{panel.features}]]*/      "Ezaugarriak",
+        apps:      /*[[#{panel.apps}]]*/          "Aplikazioak",
+        kms:       /*[[#{panel.kms}]]*/           "Barneko KMS-ak"
+      },
+      empty: {
+        nothingSelected: /*[[#{panel.empty}]]*/ "Ez dago ezer hautatuta",
+        clickHint: /*[[#{panel.hint}]]*/ "Klik egin nodo edo lotura batean"
+      },
+      apps: {
+        loading: /*[[#{panel.apps.loading}]]*/ "Aplikazioak kargatzen…",
+        none:    /*[[#{panel.apps.none}]]*/    "Aplikaziorik ez dago erregistratuta",
+        error:   /*[[#{panel.apps.error}]]*/   "Errorea aplikazioak kargatzean"
+      }
+    };
+  </script>
+  <script type="module" src="/js/main.js"></script>
 </body>
+
 </html>

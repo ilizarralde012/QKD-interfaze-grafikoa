@@ -10,16 +10,16 @@ public class ViewController {
 
     @GetMapping("/")
     public String index() {
-        return "index";  // → resources/templates/index.html
+        return "index"; 
     }
 
     @GetMapping("/apps")
     public String apps() {
-        return "apps";   // → resources/templates/apps.html
+        return "apps";  
     }
 
     @GetMapping("/requests")
     public String requests() {
-        return "requests";  // → resources/templates/requests.html
+        return "requests";  
     }
 }

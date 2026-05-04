@@ -615,9 +615,7 @@ body {
 .requests-main-fullwidth {
   flex: 1;
   overflow-y: auto;
-  padding: 32px 48px;
-  max-width: 1400px;
-  margin: 0 auto;
+  padding: 32px 0; 
 }
 
 /* Desplegagarri panela (errenkada azpian) */

@@ -1,7 +1,5 @@
 <!DOCTYPE html>
-<html lang="eu" 
-      xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html lang="eu" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
 <head>
   <meta charset="UTF-8">
@@ -22,7 +20,7 @@
   <header class="topbar">
     <span class="logo" th:text="#{title.requests}">Session Requests</span>
     <div class="topbar-sep"></div>
-    
+
     <!-- Hizkuntza hautatzailea -->
     <div class="lang-selector">
       <button class="lang-btn" id="lang-btn">
@@ -37,19 +35,16 @@
         </div>
       </div>
     </div>
-    
+
     <a href="/" class="nav-btn" th:text="#{nav.topology}">Sare Topologia</a>
     <a href="/apps" class="nav-btn" th:text="#{nav.apps}">Aplikazioak</a>
-    
+
     <!-- LOGOUT BOTOIA - KONPONDUTA -->
-    <div style="margin-left: auto; display: flex; align-items: center; gap: 12px;">      
+    <div style="margin-left: auto; display: flex; align-items: center; gap: 12px;">
       <!-- Logout formularioa - bakarrik autentikatuta badago -->
-      <form th:action="@{/logout}" method="post" 
-            style="margin: 0;" 
-            sec:authorize="isAuthenticated()">
-        <button type="submit" class="nav-btn" 
-                style="background: none; border: 1px solid var(--border); padding: 7px 16px;"
-                th:text="#{nav.logout}">
+      <form th:action="@{/logout}" method="post" style="margin: 0;" sec:authorize="isAuthenticated()">
+        <button type="submit" class="nav-btn"
+          style="background: none; border: 1px solid var(--border); padding: 7px 16px;" th:text="#{nav.logout}">
           Irten
         </button>
       </form>
@@ -58,7 +53,7 @@
 
   <!-- Layout sinplea: taula bakarrik -->
   <main class="requests-main-fullwidth">
-    <h1 th:text="#{requests.title}">Sesio eskaerak</h1>
+    <h1 th:text="#{requests.title}" style="margin-left: 20px;">Sesio eskaerak</h1>
 
     <div class="table-container">
       <div class="table-header">
@@ -122,7 +117,7 @@
       // L4
       l4Initiator: /*[[#{requests.detail.l4.initiator}]]*/ "Initiator",
       l4Responder: /*[[#{requests.detail.l4.responder}]]*/ "Responder",
-      
+
       // LEGENDA - BERRIA
       legendTitle: /*[[#{legend.title}]]*/ "TOPOLOGIA OSAGAIAK",
       legendClassical: /*[[#{legend.classical}]]*/ "Classical Link",
@@ -132,7 +127,10 @@
       legendEndpoint: /*[[#{legend.endpoint}]]*/ "Endpoint",
       legendQn: /*[[#{legend.qn}]]*/ "QN (Quantum)",
       legendCn: /*[[#{legend.cn}]]*/ "CN (Classical)",
-      legendHelp: /*[[#{legend.help}]]*/ "Klikatu sesio bat xehetasunak ikusteko"
+      legendHelp: /*[[#{legend.help}]]*/ "Klikatu sesio bat xehetasunak ikusteko",
+      legendPhysicalTitle: /*[[#{legend.physical.title}]]*/ "LOTURA MOTAK",
+legendNodesTitle:    /*[[#{legend.nodes.title}]]*/ "NODO MOTAK",
+legendLogicalTitle:  /*[[#{legend.logical.title}]]*/ "ELEMENTU LOGIKOAK",
     };
   </script>
 
@@ -412,7 +410,7 @@
 
       // Definitu arrow marker gezietarako
       const defs = svg.append('defs');
-      
+
       // Gezia aurrerantz (→)
       defs.append('marker')
         .attr('id', 'arrowhead-green')
@@ -426,7 +424,7 @@
         .attr('d', 'M0,-5L10,0L0,5L2,0Z')
         .attr('fill', '#10b981')
         .attr('stroke', 'none');
-      
+
       // Gezia atzerantz (←)
       defs.append('marker')
         .attr('id', 'arrowhead-green-reverse')
@@ -574,7 +572,7 @@
         .attr('font-weight', '600')
         .attr('fill', '#1a1d2e')
         .text(d => d.id);
-      
+
       // Endpoint icon (giltza argazkia) - Tamaina eta kokapena doituta
       siteGroups.append('image')
         .attr('class', 'endpoint-icon')
@@ -657,7 +655,7 @@
           });
 
         siteGroups.attr('transform', d => `translate(${d.x},${d.y})`);
-        
+
         // Eguneratu geziak (highlight aktibo badago)
         updateMidArrows(g);
       });
@@ -670,191 +668,211 @@
       }, 2000);
 
       // ========================================
-      // LEGENDA OROKORRA (goian, ezkerrean)
+      // LEGENDA FISIKOA (goian, ezkerrean)
       // ========================================
-      const legendGeneral = svg.append('g')
-        .attr('class', 'topology-legend-general')
+      const legendPhysical = svg.append('g')
+        .attr('class', 'topology-legend-physical')
         .attr('transform', 'translate(20, 20)');
-      
+
       // Fondo koadroa
-      legendGeneral.append('rect')
+      legendPhysical.append('rect')
         .attr('x', -10)
         .attr('y', -15)
-        .attr('width', 280)
-        .attr('height', 120)
+        .attr('width', 305)
+        .attr('height', 100)
         .attr('fill', 'white')
         .attr('stroke', '#d1d5db')
         .attr('stroke-width', 1.5)
         .attr('rx', 6)
         .attr('opacity', 0.95);
-      
+
       // Izenburua
-      legendGeneral.append('text')
+      legendPhysical.append('text')
         .attr('x', 0)
         .attr('y', 0)
-        .attr('font-size', '13px')
+        .attr('font-size', '10px')
         .attr('font-weight', '700')
-        .attr('fill', '#1a1d2e')
-        .text(t('legend.title'));
-      
-      // Classical Link
-      legendGeneral.append('line')
-        .attr('x1', 0)
-        .attr('y1', 20)
-        .attr('x2', 35)
-        .attr('y2', 20)
+        .attr('letter-spacing', '1')
+        .attr('fill', '#6b7280')
+        .text(t('legend.physical.title'));
+
+      // Classical Link — ezker zutabea (x=0)
+      legendPhysical.append('line')
+        .attr('x1', 0).attr('y1', 18)
+        .attr('x2', 30).attr('y2', 18)
         .attr('stroke', '#3b82f6')
         .attr('stroke-width', 2.5)
         .attr('stroke-opacity', 0.7);
-      
-      legendGeneral.append('text')
-        .attr('x', 42)
-        .attr('y', 24)
+
+      legendPhysical.append('text')
+        .attr('x', 36).attr('y', 22)
         .attr('font-size', '11px')
         .attr('fill', '#374151')
         .text(t('legend.classical'));
-      
-      // Quantum Link
-      legendGeneral.append('line')
-        .attr('x1', 145)
-        .attr('y1', 20)
-        .attr('x2', 180)
-        .attr('y2', 20)
+
+      // Quantum Link — eskuin zutabea (x=148)
+      legendPhysical.append('line')
+        .attr('x1', 148).attr('y1', 18)
+        .attr('x2', 178).attr('y2', 18)
         .attr('stroke', '#a855f7')
-        .attr('stroke-width', 3)
+        .attr('stroke-width', 2.5)
         .attr('stroke-opacity', 0.7)
         .attr('stroke-dasharray', '5,5');
-      
-      legendGeneral.append('text')
-        .attr('x', 187)
-        .attr('y', 24)
+
+      legendPhysical.append('text')
+        .attr('x', 184).attr('y', 22)
         .attr('font-size', '11px')
         .attr('fill', '#374151')
         .text(t('legend.quantum'));
-      
-      // KMS node
-      legendGeneral.append('circle')
-        .attr('cx', 8)
-        .attr('cy', 45)
-        .attr('r', 7)
-        .attr('fill', '#fef3c7')
-        .attr('stroke', '#f59e0b')
-        .attr('stroke-width', 2);
-      
-      legendGeneral.append('text')
-        .attr('x', 20)
-        .attr('y', 49)
-        .attr('font-size', '11px')
-        .attr('fill', '#374151')
-        .text(t('legend.kms'));
-      
-      // vKMS node
-      legendGeneral.append('circle')
-        .attr('cx', 68)
-        .attr('cy', 45)
-        .attr('r', 7)
-        .attr('fill', '#d1fae5')
-        .attr('stroke', '#10b981')
-        .attr('stroke-width', 2);
-      
-      legendGeneral.append('text')
-        .attr('x', 80)
-        .attr('y', 49)
-        .attr('font-size', '11px')
-        .attr('fill', '#374151')
-        .text(t('legend.vkms'));
-      
-      // Endpoint icon (SVG giltza)
-      const endpointLegend = legendGeneral.append('g')
-        .attr('transform', 'translate(145, 38)');
-      
-      endpointLegend.append('circle')
-        .attr('cx', 4)
-        .attr('cy', 4)
-        .attr('r', 3)
-        .attr('fill', '#FFD700')
-        .attr('stroke', '#FFA500')
+
+      // --- Banatzailea ---
+      legendPhysical.append('line')
+        .attr('x1', -5).attr('y1', 34)
+        .attr('x2', 278).attr('y2', 34)
+        .attr('stroke', '#e5e7eb')
         .attr('stroke-width', 1);
-      
-      endpointLegend.append('rect')
-        .attr('x', 6)
-        .attr('y', 2)
-        .attr('width', 4)
-        .attr('height', 2)
-        .attr('fill', '#FFD700')
-        .attr('stroke', '#FFA500')
-        .attr('stroke-width', 0.5);
-      
-      legendGeneral.append('text')
-        .attr('x', 160)
-        .attr('y', 49)
+
+      // ── NODO MOTAK (2. lerroa) ────────────────────
+      legendPhysical.append('text')
+        .attr('x', 0)
+        .attr('y', 50)
+        .attr('font-size', '10px')
+        .attr('font-weight', '700')
+        .attr('letter-spacing', '1')
+        .attr('fill', '#6b7280')
+        .text(t('legend.nodes.title'));
+      // CN nodo — ezker zutabea (x=0, lotura klasikoarekin lerrokatuta)
+      legendPhysical.append('circle')
+        .attr('cx', 9).attr('cy', 66)
+        .attr('r', 9)
+        .attr('fill', '#eff6ff')
+        .attr('stroke', '#2563eb')
+        .attr('stroke-width', 1.5);
+
+      legendPhysical.append('text')
+        .attr('x', 24).attr('y', 70)
         .attr('font-size', '11px')
         .attr('fill', '#374151')
-        .text(t('legend.endpoint'));
-      
-      // Site motak
-      legendGeneral.append('rect')
-        .attr('x', 0)
-        .attr('y', 62)
-        .attr('width', 25)
-        .attr('height', 15)
+        .text(t('legend.cn'));
+
+      // QN nodo — eskuin zutabea (x=148, lotura kuantikoarekin lerrokatuta)
+      legendPhysical.append('rect')
+        .attr('x', 148).attr('y', 57)
+        .attr('width', 18).attr('height', 18)
         .attr('fill', '#f5f3ff')
         .attr('stroke', '#7c3aed')
         .attr('stroke-width', 1.5)
         .attr('rx', 3);
-      
-      legendGeneral.append('text')
-        .attr('x', 30)
-        .attr('y', 73)
+
+      legendPhysical.append('text')
+        .attr('x', 172).attr('y', 70)
         .attr('font-size', '11px')
         .attr('fill', '#374151')
         .text(t('legend.qn'));
-      
-      legendGeneral.append('rect')
-        .attr('x', 145)
-        .attr('y', 62)
-        .attr('width', 25)
-        .attr('height', 15)
-        .attr('fill', '#eff6ff')
-        .attr('stroke', '#2563eb')
+
+
+      // ========================================
+      // LEGENDA LOGIKOA (goian, eskuinean)
+      // ========================================
+      const legendLogical = svg.append('g')
+        .attr('class', 'topology-legend-logical')
+        .attr('transform', `translate(${width - 195}, 20)`);
+
+      // Fondo koadroa
+      legendLogical.append('rect')
+        .attr('x', -10)
+        .attr('y', -15)
+        .attr('width', 190)
+        .attr('height', 115)
+        .attr('fill', 'white')
+        .attr('stroke', '#d1d5db')
         .attr('stroke-width', 1.5)
-        .attr('rx', 3);
-      
-      legendGeneral.append('text')
-        .attr('x', 175)
-        .attr('y', 73)
+        .attr('rx', 6)
+        .attr('opacity', 0.95);
+
+      // Izenburua
+      legendLogical.append('text')
+        .attr('x', 0).attr('y', 0)
+        .attr('font-size', '10px')
+        .attr('font-weight', '700')
+        .attr('letter-spacing', '1')
+        .attr('fill', '#6b7280')
+        .text(t('legend.logical.title'));
+
+      // Endpoint
+      const endpointLegend = legendLogical.append('g')
+        .attr('transform', 'translate(2, 18)');
+
+      // Endpoint
+      legendLogical.append('image')
+        .attr('href', '/images/endpoint-icon.png')
+        .attr('x', 0)
+        .attr('y', 14)
+        .attr('width', 16)
+        .attr('height', 16);
+
+      legendLogical.append('text')
+        .attr('x', 22).attr('y', 26)
         .attr('font-size', '11px')
         .attr('fill', '#374151')
-        .text(t('legend.cn'));
-      
+        .text(t('legend.endpoint'));
+
+      // vKMS
+      legendLogical.append('circle')
+        .attr('cx', 8).attr('cy', 52)
+        .attr('r', 8)
+        .attr('fill', '#d1fae5')
+        .attr('stroke', '#10b981')
+        .attr('stroke-width', 2);
+
+      legendLogical.append('text')
+        .attr('x', 22).attr('y', 56)
+        .attr('font-size', '11px')
+        .attr('fill', '#374151')
+        .text(t('legend.vkms'));
+
+      // KMS
+      legendLogical.append('circle')
+        .attr('cx', 8).attr('cy', 80)
+        .attr('r', 8)
+        .attr('fill', '#fef3c7')
+        .attr('stroke', '#f59e0b')
+        .attr('stroke-width', 2);
+
+      legendLogical.append('text')
+        .attr('x', 22).attr('y', 84)
+        .attr('font-size', '11px')
+        .attr('fill', '#374151')
+        .text(t('legend.kms'));
+
     }
-function resetHighlights(g) {
+    function resetHighlights(g) {
       // KMS nodoak
       g.selectAll('.kms-node')
         .attr('stroke', '#f59e0b')
         .attr('stroke-width', 2)
         .style('filter', 'none')
         .style('opacity', 1);
-      
+
       // vKMS nodoak
       g.selectAll('.vkms-node')
         .attr('stroke', '#10b981')
         .attr('stroke-width', 2)
         .style('filter', 'none')
         .style('opacity', 1);
-      
+
       // Classical links
       g.selectAll('.classical-link')
         .attr('stroke', '#3b82f6')
         .attr('stroke-width', 4)
         .attr('stroke-opacity', 0.4);
-      
+
       // Quantum links
       g.selectAll('.quantum-link')
         .attr('stroke', '#a855f7')
         .attr('stroke-width', 5)
         .attr('stroke-opacity', 0.6);
-      
+
       // Kendu highlight labels
       g.selectAll('.highlight-label').remove();
     }
@@ -862,7 +880,7 @@ function resetHighlights(g) {
     /**
      * Lausotu elementu guztiak (parte hartzen ez dutenak)
      */
-    
+
     function showEndpointIcon(g, siteId) {
       g.selectAll('.site-group')
         .filter(d => d.id === siteId)
@@ -874,28 +892,28 @@ function resetHighlights(g) {
       // Nodoak lausotu
       g.selectAll('.kms-node').style('opacity', 0.15);
       g.selectAll('.vkms-node').style('opacity', 0.15);
-      
+
       // Site kaxak lausotu
       g.selectAll('.site-box')
         .style('opacity', 0.3)
         .style('filter', 'blur(1px)');
-      
+
       // Site izenak lausotu
       g.selectAll('.site-label').style('opacity', 0.3);
-      
+
       // Loturak lausotu
       g.selectAll('.classical-link')
         .attr('stroke-opacity', 0.08);
-      
+
       g.selectAll('.quantum-link')
         .attr('stroke-opacity', 0.08);
-      
+
       // Kendu aurreko geziak
       g.selectAll('.mid-arrow').remove();
-      
+
       // Ezkutatu endpoint icon-ak
       g.selectAll('.endpoint-icon').style('opacity', 0);
-      
+
       // Garbitu highlighted links array-a
       highlightedLinks = [];
     }
@@ -918,60 +936,60 @@ function resetHighlights(g) {
       console.log('=== L1 DEBUG ===');
       console.log('kmsSrcId:', detail.kmsSrcId);
       console.log('kmsDstId:', detail.kmsDstId);
-      
+
       // Lausotu guztiak
       dimAll(g);
-      
+
       const kmsSrc = detail.kmsSrcId;
       const kmsDst = detail.kmsDstId;
 
       if (kmsSrc) {
         // Birgaitu nodoa
         g.selectAll('.kms-node')
-          .filter(function() { return d3.select(this).attr('data-kms-id') === kmsSrc; })
+          .filter(function () { return d3.select(this).attr('data-kms-id') === kmsSrc; })
           .style('opacity', 1);
-        
+
         highlightKMSNode(g, kmsSrc, '#3b82f6', 'Source');
-        
+
         const srcNode = topology.nodes.find(n => n.id === kmsSrc);
         if (srcNode) {
           const srcSite = srcNode.site;
-          
+
           // Birgaitu Site-a
           g.selectAll('.site-group')
             .filter(d => d.id === srcSite)
             .selectAll('.site-box, .site-label')
             .style('opacity', 1)
             .style('filter', 'none');
-          
+
           // Erakutsi endpoint icon-a
           showEndpointIcon(g, srcSite);
-          
+
           const dstNode = topology.nodes.find(n => n.id === kmsDst);
           if (dstNode) {
             const dstSite = dstNode.site;
-            
+
             // Birgaitu helmuga Site-a
             g.selectAll('.site-group')
               .filter(d => d.id === dstSite)
               .selectAll('.site-box, .site-label')
               .style('opacity', 1)
               .style('filter', 'none');
-            
+
             // Erakutsi endpoint icon-a
             showEndpointIcon(g, dstSite);
-            
+
             highlightQuantumLink(g, srcSite, dstSite, '#10b981');
           }
         }
       }
-      
+
       if (kmsDst) {
         // Birgaitu nodoa
         g.selectAll('.kms-node')
-          .filter(function() { return d3.select(this).attr('data-kms-id') === kmsDst; })
+          .filter(function () { return d3.select(this).attr('data-kms-id') === kmsDst; })
           .style('opacity', 1);
-        
+
         highlightKMSNode(g, kmsDst, '#10b981', 'Dest');
       }
     }
@@ -989,12 +1007,12 @@ function resetHighlights(g) {
       detail.l2Hops.forEach((hop, i) => {
         // Birgaitu nodoa
         g.selectAll('.kms-node')
-          .filter(function() { return d3.select(this).attr('data-kms-id') === hop.kmsId; })
+          .filter(function () { return d3.select(this).attr('data-kms-id') === hop.kmsId; })
           .style('opacity', 1);
-        
+
         const label = labels[i] || `Hop ${i + 1}`;
         highlightKMSNode(g, hop.kmsId, greenColor, label);
-        
+
         // Birgaitu Site-a
         const node = topology.nodes.find(n => n.id === hop.kmsId);
         if (node) {
@@ -1003,7 +1021,7 @@ function resetHighlights(g) {
             .selectAll('.site-box, .site-label')
             .style('opacity', 1)
             .style('filter', 'none');
-          
+
           // Erakutsi endpoint icon-a lehenengo eta azken hop-etan
           if (i === 0 || i === detail.l2Hops.length - 1) {
             showEndpointIcon(g, node.site);
@@ -1049,7 +1067,7 @@ function resetHighlights(g) {
       while (bfsQueue.length > 0) {
         const path = bfsQueue[0];  // ← lehenengo elementua lortu
         bfsQueue = bfsQueue.slice(1);  // ← lehenengo elementua kendu (shift ordez)
-        
+
         const current = path[path.length - 1];
 
         if (current === endSite) {
@@ -1090,14 +1108,14 @@ function resetHighlights(g) {
             .selectAll('.site-box, .site-label')
             .style('opacity', 1)
             .style('filter', 'none');
-          
+
           // vKMS birgaitu
           g.selectAll('.vkms-node')
-            .filter(function() { return d3.select(this).attr('data-site-id') === siteId; })
+            .filter(function () { return d3.select(this).attr('data-site-id') === siteId; })
             .style('opacity', 1);
         }
       });
-      
+
       // Erakutsi endpoint icon-ak Receiver eta Passive-n
       if (receiverSite) {
         showEndpointIcon(g, receiverSite);
@@ -1144,7 +1162,7 @@ function resetHighlights(g) {
         if (path) {
           for (let i = 0; i < path.length - 1; i++) {
             highlightClassicalLink(g, path[i], path[i + 1], '#3b82f6');
-            
+
             // Birgaitu bitarteko Site-ak ere
             [path[i], path[i + 1]].forEach(siteId => {
               g.selectAll('.site-group')
@@ -1180,18 +1198,18 @@ function resetHighlights(g) {
           .selectAll('.site-box, .site-label')
           .style('opacity', 1)
           .style('filter', 'none');
-        
+
         // vKMS birgaitu
         g.selectAll('.vkms-node')
-          .filter(function() { return d3.select(this).attr('data-site-id') === initiatorSite; })
+          .filter(function () { return d3.select(this).attr('data-site-id') === initiatorSite; })
           .style('opacity', 1);
-        
+
         // Erakutsi endpoint icon-a
         showEndpointIcon(g, initiatorSite);
-        
+
         highlightVKMSNode(g, initiatorSite, '#3b82f6', 'Initiator');
       }
-      
+
       if (responderSite) {
         // Birgaitu Site-a
         g.selectAll('.site-group')
@@ -1199,15 +1217,15 @@ function resetHighlights(g) {
           .selectAll('.site-box, .site-label')
           .style('opacity', 1)
           .style('filter', 'none');
-        
+
         // vKMS birgaitu
         g.selectAll('.vkms-node')
-          .filter(function() { return d3.select(this).attr('data-site-id') === responderSite; })
+          .filter(function () { return d3.select(this).attr('data-site-id') === responderSite; })
           .style('opacity', 1);
-        
+
         // Erakutsi endpoint icon-a
         showEndpointIcon(g, responderSite);
-        
+
         highlightVKMSNode(g, responderSite, '#10b981', 'Responder');
       }
 
@@ -1355,40 +1373,40 @@ function resetHighlights(g) {
     // Quantum link nabarmendu
     // Global aldagaia highlighted links gordetzeko
     let highlightedLinks = [];
-    
+
     function updateMidArrows(g) {
       // Geziak kendu
       g.selectAll('.mid-arrow').remove();
-      
+
       // Berriro sortu highlighted bakoitzerako
       highlightedLinks.forEach(linkInfo => {
         // Bilatu path-a source eta target-en bidez
         const pathElem = g.selectAll('.quantum-link')
-          .filter(function() {
+          .filter(function () {
             const data = d3.select(this).datum();
             const srcId = typeof data.source === 'object' ? data.source.id : data.source;
             const tgtId = typeof data.target === 'object' ? data.target.id : data.target;
-            
+
             return (srcId === linkInfo.srcId && tgtId === linkInfo.tgtId) ||
-                   (srcId === linkInfo.tgtId && tgtId === linkInfo.srcId);
+              (srcId === linkInfo.tgtId && tgtId === linkInfo.srcId);
           });
-        
+
         if (pathElem.empty()) return;
-        
+
         const pathNode = pathElem.node();
         const pathLength = pathNode.getTotalLength();
         const midPoint = pathNode.getPointAtLength(pathLength * 0.5);
-        
+
         // Kalkulatu angelua erdialdean
         const beforeMid = pathNode.getPointAtLength(pathLength * 0.48);
         const afterMid = pathNode.getPointAtLength(pathLength * 0.52);
         const angle = Math.atan2(afterMid.y - beforeMid.y, afterMid.x - beforeMid.x) * 180 / Math.PI;
-        
+
         // Sortu gezia (HANDIAGOA)
         const arrowGroup = g.append('g')
           .attr('class', 'mid-arrow')
           .attr('transform', `translate(${midPoint.x},${midPoint.y}) rotate(${angle})`);
-        
+
         arrowGroup.append('path')
           .attr('d', linkInfo.isForward ? 'M-12,-9L12,0L-12,9L-6,0Z' : 'M12,-9L-12,0L12,9L6,0Z')
           .attr('fill', linkInfo.color)
@@ -1418,13 +1436,13 @@ function resetHighlights(g) {
 
       console.log('Matched quantum links:', matched.size());
 
-      matched.each(function(d, i) {
+      matched.each(function (d, i) {
         const pathElem = d3.select(this);
         const data = pathElem.datum();
-        
+
         const srcId = typeof data.source === 'object' ? data.source.id : data.source;
         const tgtId = typeof data.target === 'object' ? data.target.id : data.target;
-        
+
         // Nabarmendu jatorrizko kurba
         pathElem
           .attr('stroke', color)
@@ -1432,10 +1450,10 @@ function resetHighlights(g) {
           .attr('stroke-opacity', 0.9)
           .attr('stroke-dasharray', null)
           .style('filter', `drop-shadow(0 0 8px ${color})`);
-        
+
         // Zehaztu norabidea
         const isForward = (srcId === sourceSite && tgtId === targetSite);
-        
+
         // Gorde informazioa geroago geziak eguneratzeko
         highlightedLinks.push({
           srcId: srcId,
@@ -1443,22 +1461,22 @@ function resetHighlights(g) {
           color: color,
           isForward: isForward
         });
-        
+
         // Sortu hasierako gezia (HANDIAGOA)
         const pathNode = pathElem.node();
         const pathLength = pathNode.getTotalLength();
         const midPoint = pathNode.getPointAtLength(pathLength * 0.5);
-        
+
         // Kalkulatu angelua erdialdean
         const beforeMid = pathNode.getPointAtLength(pathLength * 0.48);
         const afterMid = pathNode.getPointAtLength(pathLength * 0.52);
         const angle = Math.atan2(afterMid.y - beforeMid.y, afterMid.x - beforeMid.x) * 180 / Math.PI;
-        
+
         // Sortu gezia erdialdean
         const arrowGroup = g.append('g')
           .attr('class', 'mid-arrow')
           .attr('transform', `translate(${midPoint.x},${midPoint.y}) rotate(${angle})`);
-        
+
         // Gezia triangelua
         arrowGroup.append('path')
           .attr('d', isForward ? 'M-12,-9L12,0L-12,9L-6,0Z' : 'M12,-9L-12,0L12,9L6,0Z')
@@ -1472,13 +1490,13 @@ function resetHighlights(g) {
     // ========================================
     // HIZKUNTZA SISTEMA
     // ========================================
-    
+
     // Itzulpena lortu requestsI18n objektutik
     function t(key) {
       // Konbertitu 'legend.title' -> 'legendTitle'
       const camelKey = key.replace(/\./g, '').replace(/^legend/, 'legend');
       const mappedKey = camelKey.charAt(0).toLowerCase() + camelKey.slice(1);
-      
+
       // Mapak: 'legend.title' -> 'legendTitle'
       const keyMap = {
         'legend.title': 'legendTitle',
@@ -1489,12 +1507,15 @@ function resetHighlights(g) {
         'legend.endpoint': 'legendEndpoint',
         'legend.qn': 'legendQn',
         'legend.cn': 'legendCn',
+        'legend.physical.title': 'legendPhysicalTitle',
+'legend.nodes.title':    'legendNodesTitle',
+'legend.logical.title':  'legendLogicalTitle',
       };
-      
+
       const i18nKey = keyMap[key];
       return window.requestsI18n?.[i18nKey] || key;
     }
-    
+
     // Hizkuntza dropdown logika languageSelector.js-k kudeatzen du dagoeneko!
     // Ez da behar hemen bikoiztea
 

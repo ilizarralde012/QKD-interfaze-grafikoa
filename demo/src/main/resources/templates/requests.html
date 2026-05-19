@@ -717,7 +717,6 @@ legendLogicalTitle:  /*[[#{legend.logical.title}]]*/ "ELEMENTU LOGIKOAK",
         .attr('stroke', '#a855f7')
         .attr('stroke-width', 2.5)
         .attr('stroke-opacity', 0.7)
-        .attr('stroke-dasharray', '5,5');
 
       legendPhysical.append('text')
         .attr('x', 184).attr('y', 22)
@@ -1241,9 +1240,9 @@ legendLogicalTitle:  /*[[#{legend.logical.title}]]*/ "ELEMENTU LOGIKOAK",
         .filter(function () {
           return d3.select(this).attr('data-kms-id') === kmsId;
         })
-        .attr('stroke', color)
+        .attr('stroke', '#f59e0b')
         .attr('stroke-width', 3)
-        .style('filter', `drop-shadow(0 0 6px ${color}99)`);
+        .style('filter', `drop-shadow(0 0 6px #f59e0b99)`);
 
       // Label gehitu
       const node = g.selectAll('.kms-node')
@@ -1264,7 +1263,7 @@ legendLogicalTitle:  /*[[#{legend.logical.title}]]*/ "ELEMENTU LOGIKOAK",
             .attr('y', cy + 4)
             .attr('font-size', '10px')
             .attr('font-weight', '600')
-            .attr('fill', color)
+            .attr('fill', '#f59e0b')
             .text(label);
         });
       }
@@ -1319,9 +1318,9 @@ legendLogicalTitle:  /*[[#{legend.logical.title}]]*/ "ELEMENTU LOGIKOAK",
       console.log('Matched vKMS nodes:', vkmsNode.size());
 
       vkmsNode
-        .attr('stroke', color)
+        .attr('stroke', '#10b981')
         .attr('stroke-width', 3)
-        .style('filter', `drop-shadow(0 0 8px ${color}99)`);
+        .style('filter', `drop-shadow(0 0 8px #10b98199)`);
 
       if (!vkmsNode.empty() && label) {
         const cx = parseFloat(vkmsNode.attr('cx'));
@@ -1336,7 +1335,7 @@ legendLogicalTitle:  /*[[#{legend.logical.title}]]*/ "ELEMENTU LOGIKOAK",
             .attr('y', cy + 4)
             .attr('font-size', '10px')
             .attr('font-weight', '600')
-            .attr('fill', color)
+            .attr('fill', '#10b981')
             .text(label);
         });
       }
@@ -1445,11 +1444,11 @@ legendLogicalTitle:  /*[[#{legend.logical.title}]]*/ "ELEMENTU LOGIKOAK",
 
         // Nabarmendu jatorrizko kurba
         pathElem
-          .attr('stroke', color)
+          .attr('stroke', '#a855f7')
           .attr('stroke-width', 6)
           .attr('stroke-opacity', 0.9)
           .attr('stroke-dasharray', null)
-          .style('filter', `drop-shadow(0 0 8px ${color})`);
+          .style('filter', `drop-shadow(0 0 8px #a855f7)`);
 
         // Zehaztu norabidea
         const isForward = (srcId === sourceSite && tgtId === targetSite);
@@ -1458,7 +1457,7 @@ legendLogicalTitle:  /*[[#{legend.logical.title}]]*/ "ELEMENTU LOGIKOAK",
         highlightedLinks.push({
           srcId: srcId,
           tgtId: tgtId,
-          color: color,
+          color: '#a855f7',
           isForward: isForward
         });
 
@@ -1480,10 +1479,10 @@ legendLogicalTitle:  /*[[#{legend.logical.title}]]*/ "ELEMENTU LOGIKOAK",
         // Gezia triangelua
         arrowGroup.append('path')
           .attr('d', isForward ? 'M-12,-9L12,0L-12,9L-6,0Z' : 'M12,-9L-12,0L12,9L6,0Z')
-          .attr('fill', color)
-          .attr('stroke', color)
+          .attr('fill', '#a855f7')
+          .attr('stroke', '#a855f7')
           .attr('stroke-width', 1)
-          .style('filter', `drop-shadow(0 0 6px ${color})`);
+          .style('filter', `drop-shadow(0 0 6px '#a855f7')`);
       });
     }
 

@@ -481,10 +481,6 @@ legendLogicalTitle:  /*[[#{legend.logical.title}]]*/ "ELEMENTU LOGIKOAK",
       // Lotura guztiak batu
       const allLinks = [...classicalLinks, ...quantumLinks];
 
-      console.log('Sites:', sites.map(s => s.id));
-      console.log('Classical Links:', classicalLinks);
-      console.log('Quantum Links:', quantumLinks);
-
       const simulation = d3.forceSimulation(sites)
         .force('link', d3.forceLink(allLinks).id(d => d.id).distance(300).strength(0.8))
         .force('charge', d3.forceManyBody().strength(-3000))
@@ -932,10 +928,6 @@ legendLogicalTitle:  /*[[#{legend.logical.title}]]*/ "ELEMENTU LOGIKOAK",
     }
 
     function highlightL1(detail, g, topology) {
-      console.log('=== L1 DEBUG ===');
-      console.log('kmsSrcId:', detail.kmsSrcId);
-      console.log('kmsDstId:', detail.kmsDstId);
-
       // Lausotu guztiak
       dimAll(g);
 
@@ -1070,7 +1062,6 @@ legendLogicalTitle:  /*[[#{legend.logical.title}]]*/ "ELEMENTU LOGIKOAK",
         const current = path[path.length - 1];
 
         if (current === endSite) {
-          console.log('Path found:', path);
           return path;
         }
 
@@ -1083,19 +1074,12 @@ legendLogicalTitle:  /*[[#{legend.logical.title}]]*/ "ELEMENTU LOGIKOAK",
         }
       }
 
-      console.log('No path found from', startSite, 'to', endSite);
       return null;
     }
     function highlightL3(detail, g, topology) {
       const receiverSite = findSiteByVkms(topology, detail.receiverId);
       const passiveSite = findSiteByVkms(topology, detail.passiveId);
       const relaySite = findSiteByVkms(topology, detail.relayId);
-
-      console.log('=== L3 DEBUG ===');
-      console.log('Receiver:', receiverSite);
-      console.log('Passive:', passiveSite);
-      console.log('Relay:', relaySite);
-
       // Lausotu guztiak
       dimAll(g);
 
@@ -1156,7 +1140,6 @@ legendLogicalTitle:  /*[[#{legend.logical.title}]]*/ "ELEMENTU LOGIKOAK",
       // Receiver → Relay classical link (MANTENDU)
       if (receiverSite && relaySite && receiverSite !== relaySite) {
         const path = findShortestPath(classicalLinks, receiverSite, relaySite);
-        console.log('Receiver → Relay path:', path);
 
         if (path) {
           for (let i = 0; i < path.length - 1; i++) {
@@ -1178,7 +1161,6 @@ legendLogicalTitle:  /*[[#{legend.logical.title}]]*/ "ELEMENTU LOGIKOAK",
 
       // Relay → Passive quantum link (MANTENDU)
       if (relaySite && passiveSite && relaySite !== passiveSite) {
-        console.log('Relay → Passive: quantum direct');
         highlightQuantumLink(g, relaySite, passiveSite, '#10b981');
       }
     }
@@ -1297,25 +1279,17 @@ legendLogicalTitle:  /*[[#{legend.logical.title}]]*/ "ELEMENTU LOGIKOAK",
     }
 
     function highlightVKMSNode(g, siteId, color, label) {
-      console.log('=== highlightVKMSNode DEBUG ===');
-      console.log('Looking for siteId:', siteId);
-
       const allVKMS = g.selectAll('.vkms-node');
-      console.log('Total vKMS nodes:', allVKMS.size());
 
       allVKMS.each(function () {
         const attrValue = d3.select(this).attr('data-site-id');
-        console.log('vKMS node has data-site-id:', attrValue);
       });
 
       const vkmsNode = g.selectAll('.vkms-node')
         .filter(function () {
           const attrValue = d3.select(this).attr('data-site-id');
-          console.log('Comparing:', attrValue, '===', siteId, '?', attrValue === siteId);
           return attrValue === siteId;
         });
-
-      console.log('Matched vKMS nodes:', vkmsNode.size());
 
       vkmsNode
         .attr('stroke', '#10b981')
@@ -1342,8 +1316,6 @@ legendLogicalTitle:  /*[[#{legend.logical.title}]]*/ "ELEMENTU LOGIKOAK",
     }
     // Classical link nabarmendu
     function highlightClassicalLink(g, sourceSite, targetSite, color) {
-      console.log('=== highlightClassicalLink DEBUG ===');
-      console.log('Looking for:', sourceSite, '↔', targetSite);
 
       const matched = g.selectAll('.classical-link')
         .filter(function () {
@@ -1354,13 +1326,10 @@ legendLogicalTitle:  /*[[#{legend.logical.title}]]*/ "ELEMENTU LOGIKOAK",
           const srcId = typeof data.source === 'object' ? data.source.id : data.source;
           const tgtId = typeof data.target === 'object' ? data.target.id : data.target;
 
-          console.log('Checking classical link:', srcId, '↔', tgtId);
 
           return (srcId === sourceSite && tgtId === targetSite) ||
             (srcId === targetSite && tgtId === sourceSite);
         });
-
-      console.log('Matched classical links:', matched.size());
 
       matched
         .attr('stroke', color)
@@ -1416,8 +1385,6 @@ legendLogicalTitle:  /*[[#{legend.logical.title}]]*/ "ELEMENTU LOGIKOAK",
     }
 
     function highlightQuantumLink(g, sourceSite, targetSite, color) {
-      console.log('=== highlightQuantumLink DEBUG ===');
-      console.log('Looking for:', sourceSite, '→', targetSite);
 
       const matched = g.selectAll('.quantum-link')
         .filter(function () {
@@ -1427,13 +1394,10 @@ legendLogicalTitle:  /*[[#{legend.logical.title}]]*/ "ELEMENTU LOGIKOAK",
           const srcId = typeof data.source === 'object' ? data.source.id : data.source;
           const tgtId = typeof data.target === 'object' ? data.target.id : data.target;
 
-          console.log('Checking quantum link:', srcId, '↔', tgtId);
 
           return (srcId === sourceSite && tgtId === targetSite) ||
             (srcId === targetSite && tgtId === sourceSite);
         });
-
-      console.log('Matched quantum links:', matched.size());
 
       matched.each(function (d, i) {
         const pathElem = d3.select(this);

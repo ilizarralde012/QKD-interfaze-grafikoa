@@ -25,6 +25,8 @@ certificate.pem
 # Pasahitzak eta konfigurazio sentikorrak
 application-local.properties
 application-prod.properties
+.env
+*.env
 
 # Logs
 *.log

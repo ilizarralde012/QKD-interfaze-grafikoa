@@ -43,54 +43,44 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .authorizeHttpRequests(authorize -> authorize
+                .authorizeHttpRequests(authorize -> authorize
                 .requestMatchers("/login", "/css/**", "/js/**", "/images/**", "/error", "/favicon.ico").permitAll()
                 .anyRequest().authenticated()
-            )
-            .formLogin(form -> form
+                )
+                .formLogin(form -> form
                 .loginPage("/login")
-                .loginProcessingUrl("/login")  
+                .loginProcessingUrl("/login")
                 .usernameParameter("username")
                 .passwordParameter("password")
                 .defaultSuccessUrl("/", true)
                 .failureHandler((request, response, exception) -> {
-                    // Log egin errorea
-                    System.err.println("=== AUTHENTICATION FAILURE ===");
-                    System.err.println("Exception: " + exception.getClass().getName());
-                    System.err.println("Message: " + exception.getMessage());
-                    if (exception.getCause() != null) {
-                        System.err.println("Cause: " + exception.getCause().getMessage());
-                    }
-                    exception.printStackTrace();
-                    
                     // Birbideratu login-era
                     response.sendRedirect("/login?error=true");
                 })
                 .permitAll()
-            )
-            .logout(logout -> logout
+                )
+                .logout(logout -> logout
                 .logoutUrl("/logout")
                 .logoutSuccessUrl("/login?logout=true")
                 .invalidateHttpSession(true)
                 .deleteCookies("JSESSIONID")
                 .clearAuthentication(true)
                 .permitAll()
-            )
-            .sessionManagement(session -> session
+                )
+                .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
                 .maximumSessions(1)
                 .maxSessionsPreventsLogin(false)
-            )
-            .exceptionHandling(ex -> ex
-                .authenticationEntryPoint((request, response, authException) -> 
-                    response.sendRedirect("/login")
                 )
-            )
-            .csrf(csrf -> csrf
+                .exceptionHandling(ex -> ex
+                .authenticationEntryPoint((request, response, authException)
+                        -> response.sendRedirect("/login")
+                )
+                )
+                .csrf(csrf -> csrf
                 .ignoringRequestMatchers("/api/**")
-            )
-            // GAKOA: Gehitu AuthenticationManager-a HTTP security-ra
-            .authenticationManager(authenticationManager());
+                )
+                .authenticationManager(authenticationManager());
 
         return http.build();
     }
@@ -98,10 +88,10 @@ public class SecurityConfig {
     @Bean
     public AuthenticationManager authenticationManager() {
         return new ProviderManager(
-            Arrays.asList(
-                daoAuthenticationProvider(),
-                ldapAuthenticationProvider()                
-            )
+                Arrays.asList(
+                        daoAuthenticationProvider(),
+                        ldapAuthenticationProvider()
+                )
         );
     }
 
@@ -109,31 +99,31 @@ public class SecurityConfig {
     public LdapAuthenticationProvider ldapAuthenticationProvider() {
         BindAuthenticator bindAuthenticator = new BindAuthenticator(contextSource());
         bindAuthenticator.setUserSearch(
-            new FilterBasedLdapUserSearch("", userSearchFilter, contextSource())
+                new FilterBasedLdapUserSearch("", userSearchFilter, contextSource())
         );
-        
+
         return new LdapAuthenticationProvider(bindAuthenticator);
     }
 
-   @Bean
-public DaoAuthenticationProvider daoAuthenticationProvider() {
-    DaoAuthenticationProvider provider = new DaoAuthenticationProvider(databaseUserDetailsService);
-    provider.setPasswordEncoder(passwordEncoder());
-    return provider;
-}
+    @Bean
+    public DaoAuthenticationProvider daoAuthenticationProvider() {
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider(databaseUserDetailsService);
+        provider.setPasswordEncoder(passwordEncoder());
+        return provider;
+    }
 
     @Bean
     public DefaultSpringSecurityContextSource contextSource() {
-        DefaultSpringSecurityContextSource contextSource = 
-        new DefaultSpringSecurityContextSource(ldapUrl + "/" + ldapBase);
-    
-    // Timeout konfigurazioa (VPN-rik ez badago azkarrago huts egiteko)
-    java.util.Hashtable<String, Object> baseEnv = new java.util.Hashtable<>();
-    baseEnv.put("com.sun.jndi.ldap.connect.timeout", "3000");  // 3 segundo
-    baseEnv.put("com.sun.jndi.ldap.read.timeout", "3000");     // 3 segundo
-    contextSource.setBaseEnvironmentProperties(baseEnv);
-    
-    return contextSource;
+        DefaultSpringSecurityContextSource contextSource
+                = new DefaultSpringSecurityContextSource(ldapUrl + "/" + ldapBase);
+
+        // Timeout konfigurazioa (VPN-rik ez badago azkarrago huts egiteko)
+        java.util.Hashtable<String, Object> baseEnv = new java.util.Hashtable<>();
+        baseEnv.put("com.sun.jndi.ldap.connect.timeout", "3000");  // 3 segundo
+        baseEnv.put("com.sun.jndi.ldap.read.timeout", "3000");     // 3 segundo
+        contextSource.setBaseEnvironmentProperties(baseEnv);
+
+        return contextSource;
     }
 
     @Bean
